@@ -57,3 +57,7 @@ Rewritten for speed and strength on all four surfaces (Classical, Cylinder, Boun
 
 ## License
 GPL-3.0-or-later (see `LICENSE`); third-party components are listed in `NOTICE`.
+
+## Future work
+
+See [FUTURE_WORK.md](FUTURE_WORK.md) for reported mobile game-review and Cylinder-game defects, planned improvements, and regression checks.
