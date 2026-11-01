@@ -15,7 +15,7 @@ const MODES={
  ba:{name:'Bounce · all walls',info:'Diagonal slides (bishop, queen) bounce off all four edges, like a billiard ball. A slide ends if it comes back to its start square. Rooks and other pieces move as usual.'},
  cyl:{name:'Cylinder',info:'The a- and h-files are glued straight: pieces slide, jump and capture across that seam. Top and bottom stay walls.'}
 };
-let mode='flat',s,sel=null,moves=[],over=false,pend=null,hist={},vsAI=true,lvl=2,mlv=1500,slv=0,mlog=[],busy=false,last=null,sans=[],caps=[],side='w',hw=true,FLP=false,KI=-1,showHints=true,prevSt='',snd=true,flipT=false,flipP=false,keep=true,mate=false,bn=true;
+let mode='flat',s,sel=null,moves=[],over=false,pend=null,hist={},vsAI=true,lvl=3,mlv=1500,slv=0,mlog=[],busy=false,last=null,sans=[],caps=[],side='w',hw=true,FLP=false,KI=-1,showHints=true,prevSt='',snd=true,flipT=false,flipP=false,keep=true,mate=false,bn=true;
 try{showHints=localStorage.getItem('cos_hints')!=='0';snd=localStorage.getItem('cos_snd')!=='0';flipT=localStorage.getItem('cos_flip')==='1';keep=localStorage.getItem('cos_wake')!=='0';flipP=localStorage.getItem('cos_fp')==='1'}catch(e){}
 
 function step(x,y,dx,dy){
@@ -26,7 +26,7 @@ function step(x,y,dx,dy){
 }
 const MAIAS=['m1100','m1500','m1900'],SFIDS=['s1500','s2000','s2500','s3190'],LAST={m:'m1500',s:'s2000',b:'3'},
  oid=()=>slv?'s'+slv:mlv?'m'+mlv:String(lvl),
- setOpp=o=>{mlv=slv=0;if(o[0]==='m')mlv=+o.slice(1);else if(o[0]==='s')slv=+o.slice(1);else lvl=+o},
+ setOpp=o=>{mlv=slv=0;if(o[0]==='m')mlv=+o.slice(1);else if(o[0]==='s')slv=+o.slice(1);else lvl=3},
  engOf=o=>o==='h'?'h':o[0]==='m'?'m':o[0]==='s'?'s':'b';
 const tcl=(m,i)=>(m%1?m:m|0)+' | '+i,TCS=[[0,0,'No clock'],[5,0,'5 | 0']];
 let tc=0,clk=[0,0],tk=Date.now(),snaps=[],mf=false,viewI=-1,HINT=null,startFen='',startPly=0,autoQ=false,coords=true,archived=false,hintBusy=false;
@@ -47,14 +47,15 @@ function undo(){
 }
 function fen(){let r=[];for(let y=0;y<8;y++){let t='',n=0;for(let x=0;x<8;x++){const p=s.b[y*8+x];if(p){if(n)t+=n;n=0;t+=p}else n++}if(n)t+=n;r.push(t)}return r.join('/')+' '+s.t+' '+(s.c||'-')+' '+(s.ep?'abcdefgh'[s.ep.sq[0]]+(8-s.ep.sq[1]):'-')+' '+s.hm+' '+(((sans.length+startPly)>>1)+1)}
 function resText(){return typeof RV!=='undefined'&&RV.on&&RV.saved?RV.saved.txt:document.getElementById('st').textContent}
-function pgn(){const t=resText(),res=over?(/White wins/.test(t)?'1-0':/Black wins/.test(t)?'0-1':'1/2-1/2'):'*',d=new Date(),H=(k,v)=>'['+k+' "'+v+'"]\n',ai=mlv?'Maia '+mlv:slv?'Stockfish'+(slv<3190?' ('+slv+')':''):'Computer (level '+lvl+')';
+function pgn(){const t=resText(),res=over?(/White wins/.test(t)?'1-0':/Black wins/.test(t)?'0-1':'1/2-1/2'):'*',d=new Date(),H=(k,v)=>'['+k+' "'+v+'"]\n',ai=mlv?'Maia '+mlv:slv?'Stockfish'+(slv<3190?' ('+slv+')':''):'Built-in engine';
  let o=H('Event','Chess Variants')+H('Site','?')+H('Date',d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0'))+H('White',vsAI?(hw?'You':ai):'White')+H('Black',vsAI?(hw?ai:'You'):'Black')+H('Result',res);
  if(startFen)o+=H('SetUp','1')+H('FEN',startFen);if(mode!=='flat')o+=H('Variant',MODES[mode].name);if(TCS[tc][0])o+=H('TimeControl',TCS[tc][0]*60+(TCS[tc][1]?'+'+TCS[tc][1]:''));
  let m='';for(let i=0;i<sans.length;i++){const pl=i+startPly;m+=(pl%2?(i?'':((pl>>1)+1)+'... '):((pl>>1)+1)+'. ')+sans[i]+' '}return o+'\n'+m+res}
 let sM=mode,sO=vsAI?oid():'h',sS=side,sT=tc,sMin=TCS[1][0],sInc=TCS[1][1],hapt=true,lastTab='set';
 try{hapt=localStorage.getItem('cos_hap')!=='0';lastTab=localStorage.getItem('cos_tab')||'set';
  const j=JSON.parse(localStorage.getItem('cos_new')||'null');
- if(j){if(MODES[j.m])sM=j.m;if(['h','1','2','3'].concat(MAIAS,SFIDS).includes(j.o))sO=j.o;if(['w','b','r'].includes(j.s))sS=j.s;sT=j.t?1:0;if(j.n>0)sMin=j.n;if(j.i>=0)sInc=j.i;
+ if(j){if(MODES[j.m])sM=j.m;if(j.o==='1'||j.o==='2')j.o='3';/* the weaker built-in levels were removed */
+  if(['h','3'].concat(MAIAS,SFIDS).includes(j.o))sO=j.o;if(['w','b','r'].includes(j.s))sS=j.s;sT=j.t?1:0;if(j.n>0)sMin=j.n;if(j.i>=0)sInc=j.i;
   if(sM!=='flat'&&'ms'.includes(sO[0]))sO='3';mode=sM;vsAI=sO!=='h';if(vsAI)setOpp(sO);side=sS;tc=sT;TCS[1]=[sMin,sInc,tcl(sMin,sInc)]}}catch(e){}
 function swr(b,l,v,on){b.innerHTML='<span>'+l+'</span><b class="sw'+(on?' on':'')+'">'+v+'</b>'}
 function updHint(){swr(hb,'Show valid moves',showHints?'On':'Off',showHints)}
@@ -94,8 +95,8 @@ function stg(){if(sM!=='flat'&&'ms'.includes(sO[0]))sO='3';pendNote();
  for(const [k,n] of LV){const e=$('o_'+k);e.classList.toggle('on',k===sO);e.style.display=eg!=='h'&&engOf(k)===eg?'':'none';if(k===sO)$('ocap').textContent=n}
  if(eg==='h')$('ocap').textContent='Two players on this device';
  for(const e of['h','m','s','b']){const b=$('e_'+e);b.classList.toggle('on',e===eg);b.style.display=(e==='m'||e==='s')&&sM!=='flat'?'none':''}
- $('tm2').style.display=$('lvbox').style.display=eg==='h'?'none':'';
- $('mcap').textContent=sM!=='flat'?(eg==='h'?'':'The built-in engine plays this surface.'):eg==='m'?'Maia: a neural net trained on human games. It plays like a person of that rating, mistakes included.':eg==='s'?'Stockfish: the strongest open-source engine. Pick an Elo to weaken it, or Max for full strength.':eg==='b'?'The app\'s own search engine. It also plays the Cylinder and Bounce surfaces.':'';
+ $('tm2').style.display=$('lvbox').style.display=eg==='h'||eg==='b'?'none':'';/* the built-in engine has a single level */
+ $('mcap').textContent=sM!=='flat'?(eg==='h'?'':'The built-in engine plays this surface.'):eg==='m'?'Maia: a neural net trained on human games. It plays like a person of that rating, mistakes included.':eg==='s'?'Stockfish: the strongest open-source engine. Pick an Elo to weaken it, or Max for full strength.':eg==='b'?'The app\'s own search engine, at full strength. It also plays the Cylinder and Bounce surfaces.':'';
  for(const [k,n] of SIDES){$('c_'+k).classList.toggle('on',k===sS);if(k===sS)$('scap').textContent=n}
  $('sc').style.display=sO!=='h'?'block':'none';
  $('sinfo').textContent=MODES[sM].info;
@@ -274,7 +275,8 @@ function replayMoves(list){
 function loadGame(){
  let j;
  try{j=JSON.parse(localStorage.getItem('cos_game')||'null')}catch(e){return false}
- if(!j||!MODES[j.m]||!Array.isArray(j.mv)||!j.mv.length||!['h','1','2','3'].concat(MAIAS,SFIDS).includes(j.o))return false;
+ if(j&&(j.o==='1'||j.o==='2'))j.o='3';
+ if(!j||!MODES[j.m]||!Array.isArray(j.mv)||!j.mv.length||!['h','3'].concat(MAIAS,SFIDS).includes(j.o))return false;
  if(j.m!=='flat'&&'ms'.includes(j.o[0]))return false;
  mode=j.m;vsAI=j.o!=='h';if(vsAI)setOpp(j.o);side=['w','b','r'].includes(j.s)?j.s:'w';tc=j.t?1:0;
  if(j.n>0&&j.i>=0)TCS[1]=[j.n,j.i,tcl(j.n,j.i)];
@@ -424,7 +426,7 @@ function aiMove(){
  engMove();
 }
 function engMove(){
- const cf=[0,{d:2,t:400,n:70},{d:5,t:1500,n:6},{d:64,t:3500,n:0}][lvl],s0=s;busy=true;
+ const cf={d:64,t:3500,n:0},s0=s;busy=true;
  const ms=TCS[tc][0]?Math.max(80,Math.min(cf.t,clk[hw?1:0]/30)):cf.t;
  const play=r=>{
   busy=false;if(s!==s0||over||!aiT())return;
@@ -779,11 +781,11 @@ for(const k in MODES){const b=document.createElement('button');b.id='m_'+k;b.cla
 document.getElementById('ng').onclick=newGame;
 document.getElementById('cl').onclick=()=>{const r=claimReason();if(r&&!over)end('Draw by '+r+' (claimed)')};
 document.getElementById('ag').onclick=e=>{const ag=e.currentTarget;if(ag.dataset.c)end('Draw by agreement');else{ag.dataset.c=1;ag.textContent='Both agree? Click again'}};
-const LV=[['1','Built-in · easy: a beginner that sees about two moves ahead'],['2','Built-in · medium: a casual player that sees a few moves ahead'],['3','Built-in · hard: a strong engine, about 2200 on Stockfish\'s scale'],['m1100','Maia 1100 · plays like a club beginner'],['m1500','Maia 1500 · plays like a club player'],['m1900','Maia 1900 · plays like a strong club player'],['s1500','Stockfish · limited to about 1500 Elo'],['s2000','Stockfish · limited to about 2000 Elo'],['s2500','Stockfish · limited to about 2500 Elo'],['s3190','Stockfish · full strength']],OPS=[['h','Two players']].concat(LV);
+const LV=[['3','Built-in engine: strong, about 2200 on Stockfish\'s scale on Classical'],['m1100','Maia 1100 · plays like a club beginner'],['m1500','Maia 1500 · plays like a club player'],['m1900','Maia 1900 · plays like a strong club player'],['s1500','Stockfish · limited to about 1500 Elo'],['s2000','Stockfish · limited to about 2000 Elo'],['s2500','Stockfish · limited to about 2500 Elo'],['s3190','Stockfish · full strength']],OPS=[['h','Two players']].concat(LV);
 Object.assign(ICO,{hist:sv_('<path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8M3 3v5h5M12 7v5l3 2"/>'),imp:sv_('<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>')});
 for(const k of MAIAS)ICO[k]='<span class="mt">'+k.slice(1)+'</span><span class="ms">Maia</span>';
 const CPU2=ICO[2];
-for(const [k,t] of[['1','Easy'],['2','Medium'],['3','Hard']])ICO[k]='<span class="mt">'+t+'</span><span class="ms">built-in</span>';
+ICO[3]='<span class="mt">Full</span><span class="ms">built-in</span>';
 for(const k of SFIDS)ICO[k]='<span class="mt">'+(k==='s3190'?'Max':k.slice(1))+'</span><span class="ms">'+(k==='s3190'?'Stockfish':'Elo')+'</span>';
 for(const [k,n] of LV){const b=document.createElement('button');b.id='o_'+k;b.className='ib mi';b.title=n;b.setAttribute('aria-label',n);b.innerHTML=ICO[k];b.onclick=()=>{sO=k;stg()};document.getElementById('tm2').appendChild(b)}
 for(const [e,h,n] of[['h',ICO.h+'<span class="ms">friend</span>','Two players'],['m','<span class="mt sm">Maia</span><span class="ms">human-like</span>','Maia'],['s','<span class="mt sm">Stockfish</span><span class="ms">engine</span>','Stockfish'],['b',CPU2+'<span class="ms">built-in</span>','Built-in engine']]){const b=document.createElement('button');b.id='e_'+e;b.className='ib mi';b.title=n;b.setAttribute('aria-label',n);b.innerHTML=h;b.onclick=()=>{sO=e==='h'?'h':LAST[e];stg()};document.getElementById('to').appendChild(b)}

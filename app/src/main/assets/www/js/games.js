@@ -11,7 +11,7 @@ function histWrite(a){try{localStorage.setItem(HKEY,JSON.stringify(a.slice(0,HMA
 /* the review of a saved game is stored with it (one analysis per game: the latest) */
 function histRvGet(key){const r=histRead().find(x=>x.id===curArchId);return r&&r.rv&&r.rv.key===key?r.rv.data:null}
 function histRvSet(key,data){if(!curArchId)return;const a=histRead(),r=a.find(x=>x.id===curArchId);if(!r)return;r.rv={key,data};histWrite(a)}
-function oppName(){return !vsAI?'Two players':mlv?'Maia '+mlv:slv?'Stockfish'+(slv<3190?' '+slv:' max'):'Built-in '+['','easy','medium','hard'][lvl]}
+function oppName(){return !vsAI?'Two players':mlv?'Maia '+mlv:slv?'Stockfish'+(slv<3190?' '+slv:' max'):'Built-in engine'}
 function archiveGame(){
  const t=$g('st').textContent,res=/White wins/.test(t)?'1-0':/Black wins/.test(t)?'0-1':'1/2-1/2';
  const a=histRead(),id=Date.now();curArchId=id;a.unshift({id,pgn:pgn(),res,txt:t,n:sans.length,opp:oppName(),mode,you:vsAI?(hw?'w':'b'):''});

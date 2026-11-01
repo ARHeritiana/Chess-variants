@@ -1,6 +1,6 @@
 // Calibrates the built-in (Rust/WASM) engine against Stockfish (UCI_Elo-limited) on the Classical surface.
-// usage: node vs_sf.js <sfElo> <games> <engMs|L1|L2|L3> <sfMs> [workers=8]
-// engMs is the built-in engine's time per move; L1/L2/L3 play the app's easy/medium/hard settings (depth, noise and time as in app.js).
+// usage: node vs_sf.js <sfElo> <games> <engMs|L3> <sfMs> [workers=8]
+// engMs is the built-in engine's time per move; L3 plays the app's setting (3.5 s per move, full depth).
 // Each opening (4 random plies) is played twice with colours swapped. Prints the score and an Elo estimate
 // relative to the nominal Stockfish Elo. Stockfish's UCI_Elo is calibrated for long time controls, so treat the
 // absolute number as approximate; it is most useful as a baseline to compare engine changes against.
@@ -31,7 +31,7 @@ if(process.argv[2]==='worker'){
    if(R.insuffB(s.b)||s.hm>=100||plies>300)return 0.5;
    const engTurn=(s.t==='w')===engWhite;let m;
    if(engTurn){
-    const LV={L1:{ms:400,maxDepth:2,noise:70},L2:{ms:1500,maxDepth:5,noise:6},L3:{ms:3500,maxDepth:64,noise:0}}[engMs]||{ms:+engMs,maxDepth:64,noise:0};
+    const LV={L3:{ms:3500,maxDepth:64,noise:0}}[engMs]||{ms:+engMs,maxDepth:64,noise:0};
     const r=RS.search(s,{...LV,hist});
     m=r&&L.find(x=>x.fx===r.move.fx&&x.fy===r.move.fy&&x.tx===r.move.tx&&x.ty===r.move.ty);
     if(!m)return 0;
