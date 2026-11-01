@@ -4,6 +4,5 @@ release.keystore
 *.jks
 # build output
 build/
-*.apk
 *.apk.idsig
 engine-rs/target/
