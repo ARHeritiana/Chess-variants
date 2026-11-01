@@ -1,0 +1,17 @@
+[package]
+name = "cos_engine"
+version = "1.0.0"
+edition = "2021"
+description = "Search engine for Chess on Surfaces (Classical, Cylinder, Bounce) compiled to WebAssembly"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

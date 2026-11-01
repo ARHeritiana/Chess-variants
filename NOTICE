@@ -1,0 +1,11 @@
+Chess Variants — third-party components
+
+This project is distributed under the GNU GPL v3 or later (see LICENSE).
+
+- Stockfish (WebAssembly build, www/js/sf/): GPL-3. Source and licence: github.com/nmrugg/stockfish.js and
+  github.com/official-stockfish/Stockfish. Full licence text: www/js/sf/COPYING.txt.
+- Maia chess nets (www/maia/*.bin, converted by tools/convert.py): from github.com/CSSLab/maia-chess
+  (maia_weights/*.pb.gz). Check that project's licence before redistributing the weights and keep its notice here.
+- lc0 policy tables (www/maia/maia-map.json): derived from the Leela Chess Zero project (GPL-3).
+- Fonts (www/fonts/): Google Fonts / Fontsource families, mostly under the SIL Open Font License 1.1.
+  Keep each font's licence text with it if you redistribute them separately.

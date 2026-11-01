@@ -1,0 +1,6 @@
+[build]
+target = "wasm32-unknown-unknown"
+
+[target.wasm32-unknown-unknown]
+# MVP feature set so older Android WebViews can still instantiate the module
+rustflags = ["-C", "target-cpu=mvp", "-C", "target-feature=-bulk-memory,-bulk-memory-opt,-call-indirect-overlong,-sign-ext,-nontrapping-fptoint,-multivalue,-reference-types,-mutable-globals"]

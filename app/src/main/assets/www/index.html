@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-sheet="bottom" data-btn="soft" data-tabs="seg" data-tb="dock" data-fx="on">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#17181a">
+<title>Chess Variants</title>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/themes.css">
+</head>
+<body>
+<div class="amb" aria-hidden="true"></div>
+<div class="bar"><h1>Chess Variants</h1><button id="mn" aria-expanded="false" aria-controls="menu" aria-label="Menu">&#9776;</button></div>
+<div id="sbg"></div>
+<div id="menu" role="dialog" aria-label="Menu">
+<button class="mx" id="mx" aria-label="Close menu">&#10005;</button>
+<div class="grab" id="grab"></div>
+<div class="tabs" id="tabs"><i class="ind"></i><button data-t="new">New game</button><button data-t="game">Game</button><button data-t="set">Settings</button></div>
+<div class="pane" id="p_new">
+<div class="lb">Play against</div><div class="row ibr" id="to"></div><div class="row ibr" id="tm2"></div><div class="cap" id="mcap"></div><div class="cap" id="ocap"></div>
+<div id="sc"><div class="lb">Your side</div><div class="row ibr" id="tc"></div><div class="cap" id="scap"></div></div>
+<details class="dd" id="d_surf"><summary id="s_surf"></summary><div class="body"><div class="opts" id="tm"></div><div class="info" id="sinfo"></div></div></details>
+<details class="dd" id="d_time"><summary id="s_time"></summary><div class="body"><div class="row" id="tpre"></div><div id="tcs"></div></div></details>
+<div class="pend" id="pend" hidden></div>
+<button class="go" id="ng">Start game</button>
+</div>
+<div class="pane" id="p_game" hidden>
+<div class="list"><button id="rvg" disabled>Review game</button><button id="cl" disabled>Claim draw</button><button id="ag">Draw by agreement</button><button id="cpg" data-l="Copy PGN">Copy PGN</button><button id="cfn" data-l="Copy FEN">Copy FEN</button></div>
+<div class="info" id="info"></div>
+</div>
+<div class="pane" id="p_set" hidden>
+<details class="dd" id="d_theme"><summary id="s_theme"></summary><div class="body"><div class="opts" id="thg"></div></div></details>
+<details class="dd"><summary id="s_mnu"></summary><div class="body list"><button id="mst"></button></div></details>
+<details class="dd"><summary id="s_snd"></summary><div class="body list"><button id="snd"></button><button id="hap"></button><button id="anm"></button></div></details>
+<details class="dd"><summary id="s_brd"></summary><div class="body list"><button id="hint"></button><button id="flip"></button><button id="fp"></button></div></details>
+<details class="dd"><summary id="s_scr"></summary><div class="body list"><button id="fs"></button><button id="wake"></button></div></details>
+</div>
+</div>
+<div id="st"></div>
+<button id="rvb" class="rvbtn" hidden>Review game</button>
+<div class="strip" id="ts2"></div>
+<div class="bw"><canvas id="cv" width="560" height="560"></canvas><div id="pk"><div id="pkp"></div></div></div>
+<div class="strip" id="bs2"></div>
+<div class="tb"><button id="ub"><i>&#8630;</i><span>Take back</span></button><button id="rs"><i>&#9873;</i><span>Resign</span></button><button id="fm"><i>&#8645;</i><span>Flip board</span></button><button id="nw"><i>&#9854;</i><span>New game</span></button></div>
+<div class="ml" id="ml"></div>
+<div class="rv" id="rv" hidden>
+<div class="rvh"><div class="sg" id="rvEng"></div><button id="rvX" aria-label="Close review">&#10005;</button></div>
+<div class="sg" id="rvLv" hidden></div>
+<div id="rvP"><div class="rvb"><i id="rvBar"></i></div><div id="rvPt"></div></div>
+<div id="rvR" hidden>
+<div class="rvc" id="rvC"></div>
+<div class="rvn"><button id="rvFirst" aria-label="First">&#9198;</button><button id="rvPrev" aria-label="Previous">&#9664;</button><button id="rvNext" aria-label="Next">&#9654;</button><button id="rvLast" aria-label="Last">&#9197;</button><button id="rvM">Next mistake</button></div>
+<canvas id="rvG" height="64" aria-label="Evaluation graph"></canvas>
+<div class="rvt" id="rvS"></div>
+</div>
+</div>
+<script src="js/theme.js"></script>
+<script src="js/maia.js"></script>
+<script src="js/sf.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/engine-wasm.js"></script>
+<script src="js/app.js"></script>
+<script src="js/review.js"></script>
+</body>
+</html>

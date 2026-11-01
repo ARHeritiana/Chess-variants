@@ -1,0 +1,160 @@
+/* Chess Variants — theme variants.
+   js/theme.js sets <html data-theme data-mode data-btn data-sheet data-tabs data-tb> plus the CSS variables.
+   Each block below is one dimension of a theme's personality. */
+
+/* ───────── BUTTON STYLES ───────── */
+html[data-btn=soft]{--bbg:var(--card);--bbd:var(--line);--bsh:0 1px 2px rgba(0,0,0,.05)}
+html[data-btn=flat]{--bbg:color-mix(in srgb,var(--fg) 7%,var(--card));--bbd:transparent;--bsh:none}
+html[data-btn=outline]{--bbg:transparent;--bbd:color-mix(in srgb,var(--fg) 55%,transparent);--bsh:none}
+html[data-btn=brutal]{--bbg:var(--card);--bbd:var(--fg);--bsh:3px 3px 0 var(--accent);--bshp:1px 1px 0 var(--accent);--press:translate(2px,2px)}
+html[data-btn=glass]{--bbg:color-mix(in srgb,var(--card) 55%,transparent);--bbd:color-mix(in srgb,var(--fg) 14%,transparent);--bsh:0 2px 10px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.55);--bf:blur(10px)}
+html[data-btn=neon]{--bbg:color-mix(in srgb,var(--accent) 7%,transparent);--bbd:var(--accent);--bcl:var(--accent);--bsh:0 0 8px var(--glow),inset 0 0 8px color-mix(in srgb,var(--accent) 16%,transparent);--bshp:0 0 16px var(--glow),inset 0 0 12px color-mix(in srgb,var(--accent) 30%,transparent)}
+html[data-btn=candy]{--bbg:var(--card);--bbd:color-mix(in srgb,var(--fg) 16%,var(--card));--bsh:0 4px 0 color-mix(in srgb,var(--fg) 16%,var(--card));--bshp:0 1px 0 color-mix(in srgb,var(--fg) 16%,var(--card));--press:translateY(3px)}
+html[data-btn=neu]{--bbg:var(--card);--bbd:transparent;--bsh:var(--neu);--bshp:var(--neui);--press:scale(.98)}
+html[data-btn=double]{--bbg:transparent;--bbd:color-mix(in srgb,var(--fg) 70%,transparent);--bsh:0 0 0 3px var(--card),0 0 0 4px color-mix(in srgb,var(--fg) 40%,transparent)}
+/* accent-filled buttons keep each style's depth */
+html[data-btn=candy] :is(button.on,.go,button[aria-expanded=true]){--bsh:0 4px 0 var(--acc2);--bshp:0 1px 0 var(--acc2)}
+html[data-btn=brutal] :is(button.on,.go,.tb button:last-child){--bsh:3px 3px 0 var(--fg);--bshp:1px 1px 0 var(--fg)}
+html[data-btn=neon] :is(button.on,.go,.tb button:last-child){--bbg:var(--accent);--bcl:var(--onacc);--bsh:0 0 16px var(--glow)}
+html[data-btn=double] :is(button.on,.go,.tb button:last-child){--bsh:0 0 0 3px var(--card),0 0 0 4px var(--accent)}
+html[data-btn=neu] :is(button.on,.go,.tb button:last-child){--bsh:var(--neu)}
+html[data-btn=glass] :is(button.on,.go,#nw){--bf:none}
+
+/* ───────── MENU STYLES ───────── */
+html[data-sheet=bottom] #menu{left:50%;bottom:0;width:min(100vw,600px);max-height:86dvh;border-bottom:0;border-radius:var(--rsh);
+  padding:4px 16px calc(14px + env(safe-area-inset-bottom,0px));transform:translate(-50%,105%);
+  box-shadow:var(--msh),0 90px 0 var(--card);transition:transform var(--dur) var(--sheet-ease),visibility 0s linear var(--dur)}
+html[data-sheet=bottom] #menu.open{transform:translate(-50%,0);visibility:visible;transition:transform var(--dur) var(--sheet-ease)}
+
+html[data-sheet=modal] #menu{left:50%;top:50%;width:min(92vw,520px);max-height:84dvh;border-radius:var(--rsh);padding:54px 16px 14px;
+  transform:translate(-50%,-44%) scale(.93);opacity:0;transition:transform var(--dur) var(--sheet-ease),opacity var(--dur) ease,visibility 0s linear var(--dur)}
+html[data-sheet=modal] #menu.open{transform:translate(-50%,-50%);opacity:1;visibility:visible;transition:transform var(--dur) var(--sheet-ease),opacity var(--dur) ease}
+
+html[data-sheet=drawer] #menu{right:0;top:0;bottom:0;width:min(90vw,390px);border-radius:var(--rsh);border-width:0 0 0 var(--bw);padding:56px 16px 24px;
+  transform:translateX(105%);transition:transform var(--dur) var(--sheet-ease),visibility 0s linear var(--dur)}
+html[data-sheet=drawer] #menu.open{transform:none;visibility:visible;transition:transform var(--dur) var(--sheet-ease)}
+html[data-sheet=drawerL] #menu{left:0;top:0;bottom:0;width:min(90vw,390px);border-radius:var(--rsh);border-width:0 var(--bw) 0 0;padding:56px 16px 24px;
+  transform:translateX(-105%);transition:transform var(--dur) var(--sheet-ease),visibility 0s linear var(--dur)}
+html[data-sheet=drawerL] #menu.open{transform:none;visibility:visible;transition:transform var(--dur) var(--sheet-ease)}
+
+html[data-sheet=top] #menu{left:50%;top:0;width:min(100vw,600px);max-height:88dvh;border-top:0;border-radius:var(--rsh);
+  padding:calc(12px + env(safe-area-inset-top,0px)) 16px 8px;transform:translate(-50%,-105%);
+  box-shadow:0 14px 40px rgba(0,0,0,.22);transition:transform var(--dur) var(--sheet-ease),visibility 0s linear var(--dur)}
+html[data-sheet=top] #menu.open{transform:translate(-50%,0);visibility:visible;transition:transform var(--dur) var(--sheet-ease)}
+html[data-sheet=top] .grab{order:9;margin:12px auto 6px}
+
+html[data-sheet=full] #menu{inset:0;border:0;border-radius:0;padding:calc(58px + env(safe-area-inset-top,0px)) 18px 26px;
+  clip-path:inset(0 0 100% 0);transition:clip-path var(--dur) var(--sheet-ease),visibility 0s linear var(--dur)}
+html[data-sheet=full] #menu.open{clip-path:inset(0);visibility:visible;transition:clip-path var(--dur) var(--sheet-ease)}
+
+html[data-sheet=bottom] .mx{display:none}
+html:not([data-sheet=bottom]):not([data-sheet=top]) .grab{display:none}
+html:not([data-sheet=bottom]) .mx{display:block}
+html[data-sheet=full] .mx{top:calc(12px + env(safe-area-inset-top,0px))}
+html[data-sheet=top] .mx{top:calc(12px + env(safe-area-inset-top,0px));right:14px}
+html[data-sheet=top] .tabs{margin-right:0}
+html[data-sheet=top] #menu{padding-top:calc(58px + env(safe-area-inset-top,0px))}
+html[data-sheet=top] #menu .tabs{margin-top:0}
+
+/* ───────── TAB STYLES ───────── */
+html[data-tabs=seg]{--tabon:var(--fg)}
+html[data-tabs=seg] .tabs{background:var(--bg);padding:4px;border-radius:calc(var(--rb) + 4px)}
+html[data-tabs=seg] .tabs .ind{top:4px;bottom:4px;background:var(--card);border-radius:var(--rb);box-shadow:var(--sh)}
+html[data-tabs=under]{--tabon:var(--fg)}
+html[data-tabs=under] .tabs{gap:0;border-bottom:var(--bw) solid var(--line)}
+html[data-tabs=under] .tabs .ind{bottom:-1px;height:3px;background:var(--accent);border-radius:3px 3px 0 0}
+html[data-tabs=fill]{--tabon:var(--onacc)}
+html[data-tabs=fill] .tabs{background:var(--bg);padding:4px;border-radius:calc(var(--rb) + 4px)}
+html[data-tabs=fill] .tabs .ind{top:4px;bottom:4px;background:var(--accent);border-radius:var(--rb);box-shadow:0 3px 0 var(--acc2)}
+html[data-tabs=box]{--tabon:var(--accent)}
+html[data-tabs=box] .tabs{padding:3px;border:var(--bw) solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:var(--rb)}
+html[data-tabs=box] .tabs .ind{top:3px;bottom:3px;background:color-mix(in srgb,var(--accent) 16%,transparent);border:1px solid var(--accent);box-shadow:0 0 12px var(--glow);border-radius:calc(var(--rb)*.7)}
+
+/* ───────── TOOLBAR STYLES ───────── */
+html[data-tb=dock] .tb{padding:6px;border-radius:calc(var(--r)*1.3);border:var(--bw) solid var(--line);box-shadow:var(--sh);
+  background:color-mix(in srgb,var(--card) 90%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  --bbg:transparent;--bbd:transparent;--bsh:none;--bshp:none;--bf:none}
+html[data-tb=bar] .tb{width:100vw;max-width:none;margin:8px 0 0;bottom:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));border-radius:0;
+  border:solid var(--line);border-width:var(--bw) 0 0;box-shadow:0 -8px 26px rgba(0,0,0,.1);
+  background:color-mix(in srgb,var(--card) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  --bbg:transparent;--bbd:transparent;--bsh:none;--bshp:none;--bf:none}
+html[data-tb=island] .tb{gap:8px}
+html[data-tb=island] .tb button{border-radius:calc(var(--rb)*1.5);box-shadow:var(--bsh,var(--sh))}
+html[data-tb] .tb #nw{--bbg:var(--accent);--bcl:var(--onacc);--bbd:var(--accent)}
+
+/* ───────── AMBIENT BACKGROUNDS ───────── */
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(8vw,6vh) scale(1.15)}}
+@keyframes beam{0%{transform:translateY(-160px)}100%{transform:translateY(110vh)}}
+@keyframes twinkle{0%,100%{opacity:.5}50%{opacity:1}}
+.amb::before,.amb::after{content:none;position:absolute}
+
+html[data-theme=warm] .amb{background-image:radial-gradient(rgba(var(--accrgb),.15) 2px,transparent 2.6px);background-size:26px 26px}
+html[data-theme=cool] .amb::before,html[data-theme=cool] .amb::after,
+html[data-theme=romantic] .amb::before,html[data-theme=romantic] .amb::after{content:'';border-radius:50%;filter:blur(46px);animation:drift 16s ease-in-out infinite alternate}
+html[data-theme=cool] .amb::before{width:70vw;height:70vw;left:-20vw;top:-18vw;background:#f7c3de;opacity:.55}
+html[data-theme=cool] .amb::after{width:80vw;height:80vw;right:-30vw;bottom:-25vw;background:#a9c3d4;opacity:.6;animation-delay:-6s}
+html[data-theme=romantic] .amb::before{width:70vw;height:70vw;left:-20vw;top:-10vw;background:#f6b1c3;opacity:.5}
+html[data-theme=romantic] .amb::after{width:75vw;height:75vw;right:-28vw;bottom:-22vw;background:#b0cee3;opacity:.55;animation-delay:-8s}
+html[data-theme=powerful] .amb{background:repeating-linear-gradient(135deg,rgba(255,233,0,.045) 0 14px,transparent 14px 28px)}
+html[data-theme=futuristic] .amb{background:linear-gradient(color-mix(in srgb,var(--accent) 9%,transparent) 1px,transparent 1px) 0 0/100% 40px,linear-gradient(90deg,color-mix(in srgb,var(--accent) 9%,transparent) 1px,transparent 1px) 0 0/40px 100%}
+html[data-theme=futuristic] .amb::before{content:'';left:0;right:0;top:0;height:160px;background:linear-gradient(transparent,color-mix(in srgb,var(--accent) 16%,transparent),transparent);animation:beam 7s linear infinite}
+html[data-theme=futuristic] .amb::after{content:'';inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px)}
+html[data-theme=popular] .amb{background:
+  radial-gradient(circle at 10% 12%,#eb7293 0 7px,transparent 8px),radial-gradient(circle at 88% 20%,#fff251 0 10px,transparent 11px),
+  radial-gradient(circle at 78% 72%,#054a8d 0 6px,transparent 7px),radial-gradient(circle at 16% 80%,#8fcc65 0 9px,transparent 10px),
+  radial-gradient(circle at 50% 6%,#054a8d 0 4px,transparent 5px),radial-gradient(circle at 94% 52%,#eb7293 0 5px,transparent 6px);opacity:.55}
+html[data-theme=natural] .amb,html[data-theme=traditional] .amb{
+  background-image:radial-gradient(ellipse at center,transparent 55%,rgba(60,40,10,.12) 100%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+html[data-theme=exclusive] .amb{background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.35) 100%),repeating-linear-gradient(45deg,rgba(216,148,103,.05) 0 1px,transparent 1px 16px)}
+html[data-theme=dark] .amb{background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1.2px);background-size:18px 18px}
+
+/* ───────── THEME SIGNATURES (small touches that make each one feel distinct) ───────── */
+/* Powerful: hard offsets everywhere */
+html[data-theme=powerful] :is(#st,.strip,.ml,details.dd){box-shadow:3px 3px 0 var(--line)}
+html[data-theme=powerful] canvas{box-shadow:6px 6px 0 var(--accent)}
+html[data-theme=powerful] #st{background:var(--accent);color:var(--onacc);border-color:var(--bg);font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+html[data-theme=powerful] #st.mate{background:#cf1a1a;color:#fff}
+/* Futuristic: neon edges, chamfered status */
+html[data-theme=futuristic] canvas{box-shadow:0 0 0 1px var(--accent),0 0 28px var(--glow)}
+html[data-theme=futuristic] #st{clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%);border-radius:0;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--card));color:var(--accent);letter-spacing:.14em;text-transform:uppercase;padding:6px 26px}
+html[data-theme=futuristic] #st.mate{color:#fff;background:#fe2468}
+html[data-theme=futuristic] :is(.strip,.ml,details.dd,#menu){border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+html[data-theme=futuristic] #menu{background:linear-gradient(color-mix(in srgb,var(--accent) 7%,transparent) 1px,transparent 1px) 0 0/100% 40px,linear-gradient(90deg,color-mix(in srgb,var(--accent) 7%,transparent) 1px,transparent 1px) 0 0/40px 100%,var(--card)}
+html[data-theme=futuristic] .clk{color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 50%,transparent);background:transparent;text-shadow:0 0 8px var(--glow)}
+html[data-theme=futuristic] .clk.act{background:var(--accent);color:var(--onacc);text-shadow:none}
+/* Exclusive: gold double rules */
+html[data-theme=exclusive] :is(#st,.strip,.ml,details.dd){box-shadow:0 0 0 3px var(--card),0 0 0 4px color-mix(in srgb,var(--accent) 55%,transparent)}
+html[data-theme=exclusive] canvas{box-shadow:0 0 0 3px var(--bg),0 0 0 4px var(--accent),0 18px 40px rgba(0,0,0,.5)}
+html[data-theme=exclusive] #st{letter-spacing:.12em;text-transform:uppercase;font-size:13px;color:var(--accent)}
+html[data-theme=exclusive] .lb{color:var(--accent)}
+/* Traditional / Natural: paper feel */
+html[data-theme=traditional] :is(#st,.strip,.ml){border-style:solid;border-color:color-mix(in srgb,var(--fg) 55%,transparent)}
+html[data-theme=traditional] #st{font-style:italic;letter-spacing:.02em;font-size:16px}
+html[data-theme=natural] #st{font-style:italic}
+/* Popular: chunky pill status with depth */
+html[data-theme=popular] #st{border-width:2px;box-shadow:0 4px 0 color-mix(in srgb,var(--fg) 16%,var(--card));font-weight:700}
+html[data-theme=popular] canvas{box-shadow:0 6px 0 color-mix(in srgb,var(--fg) 20%,var(--card)),0 14px 28px rgba(0,0,0,.14)}
+/* Romantic: soft italic voice */
+html[data-theme=romantic] #st,html[data-theme=romantic] .lb{font-style:italic}
+html[data-theme=romantic] #st{font-size:17px}
+/* Soft: embossed surfaces */
+html[data-theme=soft] :is(#st,.strip,.ml){box-shadow:var(--neu);border-color:transparent}
+html[data-theme=soft] canvas{box-shadow:var(--neu)}
+/* Dark: terminal-ish labels */
+html[data-theme=dark] :is(.lb,.sub,.tn small){font-family:var(--fm)}
+html[data-theme=dark] #st{font-family:var(--fm);font-size:13px;letter-spacing:.02em}
+html[data-theme=modern] #st{font-size:14px;letter-spacing:.01em;box-shadow:none}
+html[data-theme=modern] :is(canvas,.strip,.ml){box-shadow:none}
+html[data-theme=cool] :is(#st,.strip,.ml){-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);background:color-mix(in srgb,var(--card) 62%,transparent)}
+
+/* Natural: leaf-shaped corners */
+html[data-theme=natural] :is(button,#st){border-radius:16px 5px 16px 5px}
+html[data-theme=natural] :is(canvas,.strip,.ml,details.dd){border-radius:24px 6px 24px 6px}
+html[data-theme=natural] .tabs{border-radius:18px 6px 18px 6px}
+
+/* tab labels: keep on one line, tuned for wide uppercase faces */
+.tabs button{white-space:nowrap}
+html[data-theme=futuristic] .tabs button,html[data-theme=exclusive] .tabs button{font-size:12.5px;letter-spacing:.06em}
+html[data-theme=powerful] .tabs button{font-size:16px}
+/* tab/accent text must win over the per-style accent-button rules */
+html[data-tabs] .tabs button.on{--bcl:var(--tabon,var(--fg));--bbg:transparent;--bsh:none;background:transparent}

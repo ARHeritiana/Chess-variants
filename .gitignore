@@ -1,0 +1,9 @@
+# signing key: never commit
+release.keystore
+*.keystore
+*.jks
+# build output
+build/
+*.apk
+*.apk.idsig
+engine-rs/target/
