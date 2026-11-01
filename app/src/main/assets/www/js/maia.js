@@ -1,14 +1,15 @@
 /* Maia (human-like chess net, lc0 format) running in plain JS. Classical rules only.
    Weights: maia/maia-<elo>.bin = BN-folded fp16 (see tools/convert.py). Policy head only; no search. */
 (function(){
+const root=typeof window!=='undefined'?window:self;
 const FILES='abcdefgh',LAYERS=6,NC=64,SE=8;
 let MAP=null;const NETS={};
 const P2=new Float32Array(32);for(let e=0;e<32;e++)P2[e]=Math.pow(2,e-15);
 function half(h){const e=(h>>10)&31,m=h&1023,s=h&0x8000?-1:1;return e===0?s*m*5.960464477539063e-8:e===31?NaN:s*P2[e]*(1+m/1024)}
-async function getBuf(u){const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status+' '+u);return r.arrayBuffer()}
+async function getBuf(u){const r=await fetch((root.MAIA_BASE||'')+u);if(!r.ok)throw new Error('HTTP '+r.status+' '+u);return r.arrayBuffer()}
 async function load(elo){
  if(NETS[elo])return NETS[elo];
- return NETS[elo]=(async()=>{
+ const p=NETS[elo]=(async()=>{
   if(!MAP){const j=JSON.parse(new TextDecoder().decode(await getBuf('maia/maia-map.json')));
    const rev=new Int16Array(1858).fill(-1);j.idx.forEach((t,i)=>{if(t>=0)rev[t]=i});
    const mv=new Map();j.moves.forEach((u,i)=>mv.set(u,i));MAP={rev,mv}}
@@ -21,6 +22,8 @@ async function load(elo){
   net.vW=take(32*NC);net.vB=take(32);net.f1W=take(128*2048);net.f1B=take(128);net.f2W=take(3*128);net.f2B=take(3);
   if(o!==f.length)throw new Error('bad weight file');
   return net})();
+ p.catch(()=>{if(NETS[elo]===p)delete NETS[elo]});
+ return p;
 }
 /* activations use a zero-padded 10x10 layout per channel */
 function conv(x,ci,W,B,co,relu,out){
@@ -121,5 +124,5 @@ function analyse(net,hist,legal,played){
  if(played)c.forEach((e,i)=>{if(e.m.fx===played.fx&&e.m.fy===played.fy&&e.m.tx===played.tx&&e.m.ty===played.ty){pp+=e.p;if(rank<0)rank=i}});
  return{wdl:f.wdl,best:c[0]?{fx:c[0].m.fx,fy:c[0].m.fy,tx:c[0].m.tx,ty:c[0].m.ty,pr:c[0].z||undefined,p:c[0].p}:null,pPlayed:pp,rank};
 }
-window.Maia={load,pick,analyse,encode,forward,_dbg:()=>MAP};
+root.MaiaCore={load,pick,analyse,encode,forward,_dbg:()=>MAP};
 })();

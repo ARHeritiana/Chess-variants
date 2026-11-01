@@ -93,7 +93,7 @@ public class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(f);
     }
 
-    @Override protected void onResume() { super.onResume(); wv.onResume(); applyKeepAwake(); applyImmersive(); }
+    @Override protected void onResume() { super.onResume(); wv.onResume(); wv.evaluateJavascript("window.__resume&&__resume()", null); applyKeepAwake(); applyImmersive(); }
     @Override protected void onPause() { wv.onPause(); super.onPause(); }
     @Override protected void onSaveInstanceState(Bundle o) { super.onSaveInstanceState(o); wv.saveState(o); }
     @Override public void onConfigurationChanged(Configuration c) {

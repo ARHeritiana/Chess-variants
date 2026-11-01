@@ -7,7 +7,7 @@
   --bg:#f6f5f1;--fg:#1d1d1b;--muted:#6b6a64;--card:#fff;--line:#d9d6cc;
   --accent:#2f7d5b;--onacc:#fff;--acc2:#1f5a41;--b:#2b6cb0;--ls:#ecdcb8;--ds:#b58863;
   --hl:rgba(255,214,0,.4);--accrgb:47,125,91;--glow:rgba(47,125,91,.45);
-  --pw:#f7f5ef;--pwo:#1b1b1b;--pb:#1b1b1b;--pbo:#f7f5ef;--pkbg:#c9a77c;
+  --pkbg:#c9a77c;
   /* shape */
   --r:14px;--rb:10px;--rs:99px;--rsh:22px 22px 0 0;--bw:1px;
   --sh:0 1px 2px rgba(0,0,0,.06),0 6px 20px rgba(0,0,0,.08);
@@ -61,35 +61,31 @@ button.on,#mn[aria-expanded=true]{--bbg:var(--accent);--bcl:var(--onacc);--bbd:v
 .info{max-width:540px;text-align:center;color:var(--muted);font-size:14px;min-height:110px;margin:2px 0 8px}
 .strip{width:var(--w);display:flex;align-items:center;gap:6px;min-height:46px;margin:6px 0;padding:6px 10px;
   border-radius:calc(var(--r)*.85);background:var(--card);border:var(--bw) solid var(--line);font-size:14px;color:var(--muted)}
-.strip>span:first-child{font-weight:600;color:var(--fg)}
+.strip>.nm{font-weight:600;color:var(--fg)}
 .strip i{font-style:normal;font-weight:600;color:var(--fg);margin-left:4px}
-.cp{font:20px/1 'ChessSym','Noto Sans Symbols 2','DejaVu Sans',serif;margin-right:-6px}
-.cpw{color:var(--pw);-webkit-text-stroke:.7px var(--pwo)}
-.cpb{color:var(--pb);-webkit-text-stroke:.7px var(--pbo)}
+img.cp{width:24px;height:24px;margin-right:-9px;flex:none}
 .clk{margin-left:auto;font:600 20px/1 var(--fm);font-variant-numeric:tabular-nums;padding:7px 11px;border-radius:calc(var(--rb)*.9);background:var(--bg);color:var(--muted)}
 .clk.act{background:var(--fg);color:var(--bg)}
 .clk.low{background:#c0392b;color:#fff}
 
 /* ───────── board ───────── */
-.bw{position:relative;width:var(--w)}
+.bw{position:relative;width:var(--bd,var(--w))}
 canvas{display:block;width:100%;height:auto;aspect-ratio:1;background:var(--card);border-radius:var(--r);
-  box-shadow:var(--sh);touch-action:manipulation}
+  box-shadow:var(--sh);touch-action:none}
 .bw.hit{animation:shake 340ms linear}
 #pk{position:absolute;inset:0;z-index:5;display:none;background:rgba(0,0,0,.18);border-radius:var(--r)}
 #pkp{position:absolute;display:flex;gap:4px;padding:4px;background:var(--card);border:var(--bw) solid var(--line);border-radius:var(--r);box-shadow:0 8px 22px rgba(0,0,0,.38);animation:pop var(--dur) var(--ease) both}
-#pkp button{padding:0;border:0;border-radius:calc(var(--rb)*.8);background:var(--pkbg);box-shadow:none;line-height:1;display:flex;align-items:center;justify-content:center;font-family:'ChessSym','Noto Sans Symbols 2','DejaVu Sans',serif}
-#pkp button:hover,#pkp button:focus-visible{background:var(--accent);outline:none}
-#pkp button span{-webkit-text-stroke:1px var(--sk)}
+#pkp button{padding:0;border:0;border-radius:calc(var(--rb)*.8);background:var(--pkbg);box-shadow:none;line-height:1;display:flex;align-items:center;justify-content:center;}
+#pkp button:hover,#pkp button:focus-visible{background:var(--accent)!important;outline:none}
+#pkp button img{width:88%;height:88%;pointer-events:none}
 
 /* ───────── bottom toolbar ───────── */
-.tb{width:var(--w);display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0;position:sticky;
+.tb{width:var(--w);display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0;position:sticky;
   bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:3}
-.tb button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px;font-size:13px;min-height:52px}
-.tb button i{font:normal 20px/1 'ChessSym','Noto Sans Symbols 2','Segoe UI Symbol',system-ui,sans-serif}
+.tb button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px;font-size:12px;min-height:52px}
+.tb button .ico{width:22px;height:22px}
 .tb button:disabled{opacity:.35}
 .tb #nw{--bbg:var(--accent);--bcl:var(--onacc);--bbd:var(--accent)}
-.ml{width:var(--w);max-height:84px;overflow:auto;margin-top:8px;font-size:14px;line-height:1.6;padding:6px 10px;
-  border:var(--bw) solid var(--line);border-radius:calc(var(--r)*.85);background:var(--card)}
 
 /* ───────── menu (container; each theme picks its own sheet style in themes.css) ───────── */
 #sbg{position:fixed;inset:0;background:var(--scrim);-webkit-backdrop-filter:blur(var(--sblur));backdrop-filter:blur(var(--sblur));
@@ -158,8 +154,11 @@ html[data-btn] .opt.on,.opt.on{--bcl:var(--fg);color:var(--fg);background:var(--
 .tn b{font-size:17px;line-height:1.15}
 .tn small{text-transform:none;letter-spacing:0;color:var(--muted);font-size:12px;font-weight:500;line-height:1.3;margin-top:2px}
 .opt.th .sw5{margin-left:auto}
-.disc{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;line-height:1;border:2px solid currentColor;font-family:'ChessSym','Noto Sans Symbols 2','DejaVu Sans',serif}
-.disc.w{background:var(--pw);color:var(--pwo)}.disc.k{background:var(--pb);color:var(--pbo)}.disc.r{background:linear-gradient(90deg,var(--pw) 50%,var(--pb) 50%);color:#888}
+.disc{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--line);position:relative;overflow:hidden;background:var(--bg)}
+.disc img{width:30px;height:30px;pointer-events:none}
+.disc.w{background:#d9d6cc}.disc.k{background:#8d8a80}
+.disc.r{background:linear-gradient(90deg,#d9d6cc 50%,#8d8a80 50%)}.disc.r img{position:absolute;inset:0;margin:auto;width:30px;height:30px}
+.disc.r img:first-child{clip-path:inset(0 50% 0 0)}.disc.r img:last-child{clip-path:inset(0 0 0 50%)}
 .step{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0 2px}
 .step>div{display:flex;gap:6px}
 .step input{width:76px;text-align:center;font:inherit;font-weight:600;border:var(--bw) solid var(--line);border-radius:var(--rb);background:var(--bg);color:var(--fg);min-height:44px}
@@ -201,7 +200,7 @@ html[data-fx=off] *,html[data-fx=off] *::before,html[data-fx=off] *::after{anima
 /* Game review */
 .rvbtn{margin:0 0 8px;--bbg:var(--accent);--bcl:var(--onacc);--bbd:var(--accent);font-weight:700;padding:8px 18px}
 .rvbtn[hidden],.rv[hidden],.rv [hidden]{display:none!important}
-body.rvm .tb,body.rvm .ml{display:none}
+body.rvm .tb,body.rvm .res{display:none}
 .rv{width:var(--w);display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .rvh{display:flex;gap:6px;align-items:center}
 .sg{display:flex;gap:6px;flex:1}.sg button{flex:1;min-height:40px}
@@ -213,5 +212,114 @@ body.rvm .tb,body.rvm .ml{display:none}
 .rvt b{text-align:center}.rvt span{color:var(--muted)}
 #rvG{width:100%;height:64px;border-radius:10px;border:var(--bw) solid var(--line);cursor:pointer;display:block;margin:8px 0}
 .rvc{min-height:70px;padding:8px 12px;border-radius:var(--r);background:var(--card);border:var(--bw) solid var(--line);font-size:14px;line-height:1.5;margin-bottom:8px}
-.rvn{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.rvn button{min-height:44px;font-size:18px}
-#rvM{grid-column:1/-1;font-size:14px}
+
+
+/* ───────── move browser, result card, board badge ───────── */
+.mv{width:var(--w);display:flex;align-items:center;gap:6px;margin-top:8px}
+.mv button{padding:0;min-width:40px;height:40px;display:grid;place-items:center;flex:none}
+.mv button:disabled{opacity:.3}
+.mv .ico{width:20px;height:20px}
+.ml{position:relative;flex:1;min-width:0;height:40px;display:flex;align-items:center;gap:2px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;padding:0 8px;
+  border:var(--bw) solid var(--line);border-radius:calc(var(--r)*.7);background:var(--card);font-size:14px;scrollbar-width:none;-webkit-user-select:none;user-select:none}
+.ml::-webkit-scrollbar{display:none}
+.ml b{color:var(--muted);font-weight:500;margin:0 2px 0 8px;font-size:12px;flex:none}
+.ml .pl{padding:4px 7px;border-radius:calc(var(--rb)*.8);cursor:pointer;font-weight:600;flex:none}
+.ml .pl.cur{background:var(--accent);color:var(--onacc)}
+.ml .mt{color:var(--muted)}
+.ml .rz{margin-left:10px;color:var(--fg);font-size:13px}
+.vbadge{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:4;font-size:12px;padding:4px 12px;border-radius:99px;background:var(--accent);color:var(--onacc);border:0;box-shadow:var(--sh);white-space:nowrap}
+.res{width:var(--w);margin:6px 0;padding:10px 12px;border-radius:var(--r);background:var(--card);border:var(--bw) solid var(--line);box-shadow:var(--sh);text-align:center}
+.res[hidden],.vbadge[hidden]{display:none}
+.res .rt{font:var(--fdw) 17px var(--fd);margin-bottom:8px;letter-spacing:var(--tls);text-transform:var(--tt)}
+.rbt{display:flex;gap:6px}.rbt button{flex:1;min-height:42px;font-weight:600;margin:0;padding:6px 8px}
+.rbt #rm{--bbg:var(--accent);--bcl:var(--onacc);--bbd:var(--accent)}
+.av{width:28px;height:28px;flex:none;margin-right:2px}
+.tb button.wait{opacity:.5}
+
+/* ───────── import / saved games ───────── */
+#imp{width:100%;font:13px/1.4 var(--fm);background:var(--bg);color:var(--fg);border:var(--bw) solid var(--line);border-radius:var(--rb);padding:8px 10px;resize:vertical;-webkit-user-select:text;user-select:text;margin-bottom:8px}
+#impMsg.bad{color:#c0392b}
+.hr{display:flex;align-items:center;gap:6px;padding:8px 0;border-top:var(--bw) solid var(--line)}
+.hr:first-child{border-top:0}
+.hm{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.hm .r{font-size:15px}.hm .r.win{color:var(--accent)}.hm .r.loss{color:#c0392b}
+.hm span{font-size:13px}.hm small{color:var(--muted);font-size:12px}
+.hr button{min-height:38px;padding:4px 10px;font-size:13px}
+#menu .ib{min-width:0;overflow:hidden}
+#menu .ib.mi .mt.sm{font-size:12px}
+
+/* ───────── review panel ───────── */
+.rvn{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}.rvn button{min-height:42px;font-size:14px}
+.rvc{min-height:84px}
+.rh{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.bdg{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 15px/1 var(--fu);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.dim{color:var(--muted);font-size:13px}
+.rl{font-size:14px;line-height:1.45;margin-top:3px}.rl.dim{font-size:13px}
+.rvt{grid-template-columns:1.6fr 1fr 1fr}
+.rvt .acc{font-size:16px;margin-bottom:4px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:baseline}
+.ml .pl.k0::after{content:'\2605';color:#2e9e5b;font-size:10px;margin-left:2px}
+.ml .pl.k3::after{content:'?!';color:#d9a400;font-size:11px;margin-left:2px}
+.ml .pl.k4::after{content:'?';color:#e67e22;font-size:12px;margin-left:2px}
+.ml .pl.k5::after{content:'??';color:#d9392b;font-size:12px;margin-left:2px}
+.ml .pl.cur::after{color:inherit}
+.hr button{padding:4px 8px}
+body.rvm .vbadge{display:none}
+.rvh{justify-content:space-between;font:var(--fdw) 17px var(--fd);letter-spacing:var(--tls);text-transform:var(--tt)}
+.rvh button{min-height:38px;padding:4px 16px;font-size:14px}
+.rv .lb{margin-top:6px}
+
+.rvac{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.ac{display:flex;flex-direction:column;align-items:center;padding:10px 6px;border-radius:var(--r);background:var(--card);border:var(--bw) solid var(--line)}
+.ac span{font-weight:600}.ac b{font:var(--fdw) 34px/1.1 var(--fd)}.ac small{color:var(--muted)}
+.ac b::after{content:'%';font-size:16px;margin-left:1px}
+#rvK{display:flex;flex-wrap:wrap;gap:6px;align-items:center}#rvK .lb{width:100%;margin:6px 0 0}
+.km{padding:4px 10px;min-height:34px;font-size:13px}
+.rvgo,#rvBack{width:100%;min-height:46px;margin-top:6px;font-weight:700}
+.rvgo{--bbg:var(--accent);--bcl:var(--onacc);--bbd:var(--accent);font-size:16px}
+.rvn .main{--bbg:var(--accent);--bcl:var(--onacc);--bbd:var(--accent);font-weight:700}
+.rvn button{min-height:46px}
+.lnk{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;box-shadow:none;font-size:inherit}
+
+/* ───────── menu: flat standard sections ───────── */
+#menu .lb{margin:16px 0 8px}
+#menu .pane>.lb:first-child{margin-top:4px}
+.opts.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:none;overflow:visible}
+.opts.grid .opt{flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:6px;min-height:78px;padding:10px 6px;border:var(--bw) solid var(--line);background:var(--card)}
+.opts.grid .opt.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.opts.grid .opt .ico{width:28px;height:28px}
+.opts.grid .opt.th{min-height:92px}
+.opts.grid .opt.th .tn{align-items:center}.opts.grid .opt.th .tn small{display:none}
+.opts.grid .opt.th .sw5{margin:0}
+#menu .list{margin-bottom:0}
+#menu .pane .info{margin-top:14px}
+#hl:empty{display:none}
+.tabs button{padding:6px 2px;min-width:0;font-size:clamp(12px,3.9vw,15px)}
+
+/* ───────── tablets and landscape ─────────
+   --w  width of the controls column (strips, toolbar, move list, review)
+   --bd width of the board (defaults to --w)                                                    */
+@media (min-width:700px) and (orientation:portrait){
+  :root{--w:min(92vw,740px)}
+  body{font-size:calc(var(--fsz)*1.1);padding-top:16px}
+  .strip{min-height:54px}.tb button{min-height:58px;font-size:13px}
+  #menu{--menu-max:640px}
+}
+/* two columns: board on the left, everything else on the right */
+@media (min-width:640px) and (orientation:landscape) and (min-aspect-ratio:5/4){
+  :root{--bd:min(calc(100dvh - 76px),calc(100vw - 420px),860px);--w:min(420px,calc(100vw - var(--bd) - 56px))}
+  body{display:grid;grid-template-columns:var(--bd) minmax(0,var(--w));column-gap:24px;justify-content:center;
+    grid-template-rows:auto repeat(7,min-content) 1fr;align-content:start;align-items:start;padding:8px 20px}
+  .bar{grid-column:1/-1;grid-row:1;width:100%;margin-bottom:4px}
+  .bw{grid-column:1;grid-row:2/10;position:sticky;top:8px}
+  #ts2{grid-column:2;grid-row:2}#st{grid-column:2;grid-row:3;justify-self:start;margin:2px 0 6px}
+  #bs2{grid-column:2;grid-row:4}.res{grid-column:2;grid-row:5}
+  .tb{grid-column:2;grid-row:6;position:static}
+  .mv{grid-column:2;grid-row:7}.rv{grid-column:2;grid-row:8}
+  .strip,.res,.tb,.mv,.rv{width:100%}
+  html[data-tb=bar] .tb{width:100%;max-width:none;margin:8px 0;border-width:var(--bw);border-radius:calc(var(--r)*.9)}
+}
+@media (min-width:700px) and (orientation:landscape) and (min-aspect-ratio:5/4){
+  body{font-size:calc(var(--fsz)*1.05)}
+  .tb button{min-height:56px}
+}

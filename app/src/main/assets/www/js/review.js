@@ -1,97 +1,109 @@
-/* Game review: analyse every position with Stockfish (default), Maia, or the built-in engine (variant surfaces),
-   then grade each move by how much win-probability it gave away. Loaded after app.js and shares its globals. */
-const RV={on:false,eng:'sf',ml:1500,tok:0,i:0,POS:[],MV:[],data:null,cache:{},gid:'',saved:null,arrow:null};
-try{RV.eng=localStorage.cos_rveng||'sf';RV.ml=+localStorage.cos_rvml||1500}catch(e){}
+/* Game review: every position is analysed (Stockfish by default, Maia, or the built-in engine on the variant surfaces),
+   then each move is graded by the win probability it gave away. The review drives the normal move browser (viewTo), so the
+   board, the move list and the keys behave the same in and out of review. Loaded after app.js and games.js and shares their globals. */
+const RV={on:false,eng:'sf',ml:1500,q:1,tok:0,i:0,POS:[],MV:[],data:null,cache:{},gid:'',saved:null,arrow:null,arrow2:null,stage:'sum',key:''};
+try{RV.eng=localStorage.cos_rveng||'sf';RV.ml=+localStorage.cos_rvml||1500;RV.q=+localStorage.cos_rvq;if(!(RV.q>=0&&RV.q<=2))RV.q=1}catch(e){}
 const $r=id=>document.getElementById(id);
-const CLS=[['Best','#2e9e5b','Best moves'],['Good','#6aa84f','Good moves'],['Inaccuracy','#d9a400','Inaccuracies'],['Mistake','#e67e22','Mistakes'],['Blunder','#d9392b','Blunders']];
-/* Maia has no search, so its value head misses tactics: add an exact mate-in-1 check */
-function mate1(P,L){for(const m of L){const Q=apply(P,m);if(!legal(Q).length&&check(Q,Q.t==='w'))return true}return false}
+/* name, colour, plural, badge symbol */
+const CLS=[['Best','#2e9e5b','Best moves','★'],['Excellent','#62a84a','Excellent moves','!'],['Good','#98ad3a','Good moves','✓'],
+ ['Inaccuracy','#d9a400','Inaccuracies','?!'],['Mistake','#e67e22','Mistakes','?'],['Blunder','#d9392b','Blunders','??']];
+const QUAL=[['Fast',250,10],['Standard',600,14],['Deep',1500,18]];
 const rvEngine=()=>mode!=='flat'?'bi':RV.eng==='mj'?'mj':'sf';
 const sameMv=(a,b)=>a&&b&&a.fx===b.fx&&a.fy===b.fy&&a.tx===b.tx&&a.ty===b.ty&&(a.pr||'q')===(b.pr||'q');
 const NAMES={sf:'Stockfish',mj:'Maia',bi:'Built-in'};
+const rvKey=eg=>eg==='mj'?'mj'+RV.ml:eg+'q'+RV.q;
+/* Maia has no search, so its value head misses tactics: add an exact mate-in-1 check */
+function mate1(P,L){for(const m of L){const Q=apply(P,m);if(!legal(Q).length&&check(Q,Q.t==='w'))return true}return false}
 
+/* can a review be started right now? (any game with moves, as long as the computer is not mid-move) */
+function rvAllowed(){return !RV.on&&sans.length>0&&!busy&&!(aiT()&&!over)}
 function rvSync(){
- const ok=over&&sans.length>0;
- $r('rvb').hidden=!(ok&&!RV.on);$r('rvg').disabled=!ok;
+ $r('rvb').hidden=!(over&&sans.length>0&&!RV.on);
+ $r('rvg').disabled=!rvAllowed();
 }
 function openReview(){
- if(!over||!sans.length||RV.on)return;
+ if(!rvAllowed())return;
  const POS=[...snaps.map(z=>z.s),s];
  if(POS.length!==mlog.length+1)return;
- closeMenu();
+ closeMenu();if(pend)cancelPromo();
  const st=$r('st');
- RV.saved={s,last,moves,sel,pend,mate,txt:st.textContent,cls:st.className};
+ RV.saved={txt:st.textContent,cls:st.className};
  RV.POS=POS;RV.MV=mlog.slice();
- const gid=sans.join(' ')+'|'+mode;if(gid!==RV.gid){RV.gid=gid;RV.cache={}}
- RV.on=true;RV.i=POS.length-1;sel=null;pend=null;
+ const gid=sans.join(' ')+'|'+mode+'|'+startFen;if(gid!==RV.gid){RV.gid=gid;RV.cache={}}
+ RV.on=true;RV.i=0;RV.data=null;RV.arrow=RV.arrow2=null;RV.stage='sum';sel=null;HINT=null;
  document.body.classList.add('rvm');$r('rv').hidden=false;rvSync();
  rvStart();
 }
 function closeReview(){
  if(!RV.on)return;
- RV.tok++;if(typeof SF!=='undefined')SF.stop();
- const v=RV.saved;s=v.s;last=v.last;moves=v.moves;sel=v.sel;pend=v.pend;mate=v.mate;
- const st=$r('st');st.textContent=v.txt;st.className=v.cls;
+ RV.tok++;if(typeof SF!=='undefined')SF.stop();if(Eng.cancel)Eng.cancel();
  RV.on=false;RV.arrow=null;document.body.classList.remove('rvm');$r('rv').hidden=true;
- rvSync();draw();
+ const st=$r('st');st.textContent=RV.saved.txt;st.className=RV.saved.cls;
+ tk=Date.now();rvSync();viewTo(sans.length);
 }
 function rvButtons(){
- const eg=rvEngine(),b=$r('rvEng');
- b.innerHTML='';
- const mk=(k,t)=>{const e=document.createElement('button');e.textContent=t;e.className=eg===k?'on':'';e.onclick=()=>{if(k==='bi'||eg===k)return;RV.eng=k;try{localStorage.cos_rveng=k}catch(x){}rvStart()};b.appendChild(e)};
- if(eg==='bi')mk('bi','Built-in engine');else{mk('sf','Stockfish');mk('mj','Maia')}
- const l=$r('rvLv');l.hidden=eg!=='mj';l.innerHTML='';
- for(const v of[1100,1500,1900]){const e=document.createElement('button');e.textContent='Maia '+v;e.className=RV.ml===v?'on':'';e.onclick=()=>{RV.ml=v;try{localStorage.cos_rvml=v}catch(x){}rvStart()};l.appendChild(e)}
+ const eg=rvEngine(),b=$r('rvEng'),l=$r('rvLv');
+ b.innerHTML='';l.innerHTML='';
+ const mk=(host,t,on,fn)=>{const e=document.createElement('button');e.textContent=t;e.className=on?'on':'';e.onclick=fn;host.appendChild(e)};
+ if(eg==='bi')mk(b,'Built-in engine',true,()=>{});
+ else for(const [k,t] of[['sf','Stockfish'],['mj','Maia']])mk(b,t,eg===k,()=>{if(eg===k)return;RV.eng=k;try{localStorage.cos_rveng=k}catch(x){}rvStart()});
+ if(eg==='mj')for(const v of[1100,1500,1900])mk(l,'Maia '+v,RV.ml===v,()=>{RV.ml=v;try{localStorage.cos_rvml=v}catch(x){}rvStart()});
+ else QUAL.forEach((q,i)=>mk(l,q[0],RV.q===i,()=>{RV.q=i;try{localStorage.cos_rvq=i}catch(x){}rvStart()}));
 }
 async function rvStart(){
- const eg=rvEngine(),key=eg==='mj'?'mj'+RV.ml:eg,tok=++RV.tok;
+ const eg=rvEngine(),key=rvKey(eg),tok=++RV.tok;
  if(typeof SF!=='undefined')SF.stop();
  rvButtons();RV.key=key;
- if(RV.cache[key]){RV.data=RV.cache[key];return rvShow()}
+ let d=RV.cache[key]||rvSaved(key,eg);
+ if(d){RV.cache[key]=d;RV.data=d;return rvShow()}
  RV.data=null;RV.arrow=null;$r('rvR').hidden=true;$r('rvP').hidden=false;$r('rvBar').style.width='0';$r('rvPt').textContent='Starting '+NAMES[eg]+'…';
- let d=null;
  try{d=await rvAnalyse(eg,tok)}catch(e){
   if(tok!==RV.tok)return;
   $r('rvPt').textContent=NAMES[eg]+' could not run here'+(eg==='sf'?'. Try Maia instead.':'.');$r('rvBar').style.width='0';return;
  }
  if(!d||tok!==RV.tok)return;
- RV.cache[key]=d;RV.data=d;rvShow();
+ RV.cache[key]=d;RV.data=d;rvSave(key,d);rvShow();
+}
+/* analysed games are kept with their saved game, so reopening a review is instant */
+function rvSaved(key,eg){
+ try{const raw=typeof histRvGet==='function'&&histRvGet(key);return raw&&raw.ev&&raw.ev.length===RV.POS.length?rvFinish(raw,eg):null}catch(e){return null}
+}
+function rvSave(key,d){
+ try{if(typeof histRvSet==='function')histRvSet(key,{ev:d.ev.map(v=>Math.round(v*10)/10),best:d.best,ex:d.ex})}catch(e){}
 }
 async function rvAnalyse(eg,tok){
- const n=RV.POS.length,ev=new Array(n),best=new Array(n),ex=new Array(n);
+ const n=RV.POS.length,ev=new Array(n),best=new Array(n),ex=new Array(n),Q=QUAL[RV.q];
  const prog=i=>{if(tok!==RV.tok)return;$r('rvBar').style.width=(100*i/n)+'%';$r('rvPt').textContent='Analysing position '+i+' of '+n+' · '+NAMES[eg]+(eg==='mj'?' '+RV.ml:'')};
  let net=null;
  if(eg==='mj')net=await Maia.load(RV.ml);
  if(eg==='sf')await SF.init();
- try{
-  for(let i=0;i<n;i++){
-   if(tok!==RV.tok)return null;
-   const P=RV.POS[i],L=legal(P),w=P.t==='w';
-   if(!L.length){ev[i]=check(P,w)?(w?0:100):50;best[i]=null;ex[i]={term:check(P,w)?(w?'0–1':'1–0'):'½–½'};prog(i+1);continue}
-   const mv=i<n-1?RV.MV[i]:null;
-   if(eg==='sf'){
-    const r=await SF.search(SF.toFen(P,i),{depth:14,movetime:600});if(tok!==RV.tok)return null;
-    const wp=SF.winPct(r);ev[i]=w?wp:100-wp;best[i]=SF.fromUci(r.best);
-    ex[i]={cp:r.cp==null?null:(w?r.cp:-r.cp),mate:r.mate==null?null:(w?r.mate:-r.mate)};
-   }else if(eg==='mj'){
-    const a=Maia.analyse(net,RV.POS.slice(Math.max(0,i-7),i+1),L,mv),m1=mate1(P,L),sc=m1?100:(a.wdl[0]+a.wdl[1]/2)*100;
-    ev[i]=w?sc:100-sc;best[i]=a.best;ex[i]={m1,wdl:w?a.wdl:[a.wdl[2],a.wdl[1],a.wdl[0]],pp:a.pPlayed,rank:a.rank,bp:a.best&&a.best.p};
-    await new Promise(r=>setTimeout(r,0));
-   }else{
-    Eng.setMode(mode);const r=Eng.search(P,{ms:350}),wp=SF.winPct({cp:r.cp});ev[i]=w?wp:100-wp;best[i]=r.move;ex[i]={cp:w?r.cp:-r.cp};
-    await new Promise(r=>setTimeout(r,0));
-   }
-   prog(i+1);
+ for(let i=0;i<n;i++){
+  if(tok!==RV.tok)return null;
+  const P=RV.POS[i],L=legal(P),w=P.t==='w';
+  if(!L.length){ev[i]=check(P,w)?(w?0:100):50;best[i]=null;ex[i]={term:check(P,w)?(w?'0–1':'1–0'):'½–½'};prog(i+1);continue}
+  const mv=i<n-1?RV.MV[i]:null;
+  if(eg==='sf'){
+   const r=await SF.search(SF.toFen(P,i+startPly),{depth:Q[2],movetime:Q[1]});if(tok!==RV.tok)return null;
+   const wp=SF.winPct(r);ev[i]=w?wp:100-wp;best[i]=SF.fromUci(r.best);
+   ex[i]={cp:r.cp==null?null:(w?r.cp:-r.cp),mate:r.mate==null?null:(w?r.mate:-r.mate),pv:(r.pv||[]).slice(0,8)};
+  }else if(eg==='mj'){
+   const a=await Maia.analyse(net,RV.POS.slice(Math.max(0,i-7),i+1),L,mv);if(tok!==RV.tok)return null;const m1=mate1(P,L),sc=m1?100:(a.wdl[0]+a.wdl[1]/2)*100;
+   ev[i]=w?sc:100-sc;best[i]=a.best;ex[i]={m1,wdl:w?a.wdl:[a.wdl[2],a.wdl[1],a.wdl[0]],pp:a.pPlayed,rank:a.rank,bp:a.best&&a.best.p};
+  }else{
+   const r=await Eng.searchAsync(mode,P,{ms:[150,350,900][RV.q]});if(tok!==RV.tok)return null;
+   const wp=SF.winPct({cp:r.cp});ev[i]=w?wp:100-wp;best[i]=r.move;ex[i]={cp:w?r.cp:-r.cp};
   }
- }finally{}
+  prog(i+1);
+ }
  return rvFinish({ev,best,ex},eg);
 }
+/* ev = White's win % per position; a move's loss is how much the mover's win % fell */
 function rvFinish(d,eg){
- const n=RV.POS.length;d.loss=[];d.cls=[];d.acc=[0,0];d.nm=[0,0];d.cnt=[[0,0,0,0,0],[0,0,0,0,0]];
+ const n=RV.POS.length;d.loss=[];d.cls=[];d.acc=[0,0];d.nm=[0,0];d.cnt=[[0,0,0,0,0,0],[0,0,0,0,0,0]];
  for(let j=0;j<n-1;j++){
   const w=RV.POS[j].t==='w',l=Math.max(0,w?d.ev[j]-d.ev[j+1]:d.ev[j+1]-d.ev[j]);
   d.loss[j]=l;
-  const c=(sameMv(d.best[j],RV.MV[j])&&l<5)||l<1?0:l<5?1:l<10?2:l<20?3:4;
+  const c=(sameMv(d.best[j],RV.MV[j])&&l<5)||l<.5?0:l<2?1:l<5?2:l<10?3:l<20?4:5;
   d.cls[j]=c;const sd=w?0:1;
   d.acc[sd]+=Math.max(0,Math.min(100,103.1668*Math.exp(-0.04354*l)-3.1669));d.nm[sd]++;d.cnt[sd][c]++;
  }
@@ -99,7 +111,7 @@ function rvFinish(d,eg){
  return d;
 }
 function rvEv(i){
- const e=RV.data.ex[i],eg=rvEngine();
+ const e=RV.data.ex[i];
  if(e.term)return e.term;
  if(e.mate!=null)return(e.mate>0?'M':'−M')+Math.abs(e.mate);
  if(e.cp!=null){const v=e.cp/100;return(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1)}
@@ -107,61 +119,125 @@ function rvEv(i){
  if(e.wdl)return Math.round(RV.data.ev[i])+'% White';
  return'';
 }
+/* stage 'sum': accuracy, graph, counts, key moments.  stage 'walk': step through the game with feedback and arrows. */
+function rvStage(st){
+ RV.stage=st;
+ $r('rvSumBox').hidden=st!=='sum';$r('rvWalk').hidden=st!=='walk';
+}
 function rvShow(){
  const d=RV.data;$r('rvP').hidden=true;$r('rvR').hidden=false;
- const f=v=>v==null?'–':Math.round(v)+'%',row=(l,a,b,c)=>'<span'+(c?' style="color:'+c+'"':'')+'>'+l+'</span><b>'+a+'</b><b>'+b+'</b>';
- $r('rvS').innerHTML='<span></span><b>White</b><b>Black</b>'+row('Accuracy',f(d.acc[0]),f(d.acc[1]))+[4,3,2].map(k=>row(CLS[k][2],d.cnt[0][k],d.cnt[1][k],CLS[k][1])).join('');
- rvGo(RV.i);
+ const f=v=>v==null?'\u2013':Math.round(v),row=(l,a,b,c)=>'<span style="color:'+c+'"><i class="dot" style="background:'+c+'"></i>'+l+'</span><b>'+a+'</b><b>'+b+'</b>';
+ const card=(who,a)=>'<div class="ac"><span>'+who+'</span><b>'+f(a)+'</b><small>accuracy</small></div>';
+ $r('rvAcc').innerHTML=card('White',d.acc[0])+card('Black',d.acc[1]);
+ $r('rvS').innerHTML='<span></span><b>White</b><b>Black</b>'+CLS.map((c,k)=>row(c[2],d.cnt[0][k],d.cnt[1][k],c[1])).join('');
+ const km=[];d.cls.forEach((c,j)=>{if(c>=4)km.push(j)});
+ $r('rvK').innerHTML=km.length?'<div class="lb">Key moments</div>'+km.slice(0,16).map(j=>{const pl=j+startPly;
+   return '<button class="km" data-p="'+(j+1)+'" style="border-color:'+CLS[d.cls[j]][1]+'"><b style="color:'+CLS[d.cls[j]][1]+'">'+CLS[d.cls[j]][3]+'</b> '+((pl>>1)+1)+(pl%2?'\u2026':'.')+' '+sans[j]+'</button>'}).join('')+(km.length>16?'<span class="dim"> +'+(km.length-16)+' more</span>':''):'<div class="rl dim">No mistakes or blunders. Clean game.</div>';
+ $r('rvK').onclick=e=>{const b=e.target.closest('.km');if(b){rvStage('walk');viewTo(+b.dataset.p)}};
+ rvStage('sum');viewTo(0);
 }
-function rvGraph(){
- const cv=$r('rvG'),w=cv.clientWidth||300,h=64,dpr=window.devicePixelRatio||1,d=RV.data,n=RV.POS.length;
+function rvGraph(){for(const id of['rvG','rvG2'])rvGraph1($r(id))}
+function rvGraph1(cv){
+ const w=cv.clientWidth||300,h=64,dpr=window.devicePixelRatio||1,d=RV.data,n=RV.POS.length;if(!d||!w)return;
  cv.width=w*dpr;cv.height=h*dpr;const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
  const X=i=>n>1?i/(n-1)*w:0,Y=v=>h-v/100*h;
  g.fillStyle='#3a3a38';g.fillRect(0,0,w,h);
  g.fillStyle='#f1efe8';g.beginPath();g.moveTo(0,h);for(let i=0;i<n;i++)g.lineTo(X(i),Y(d.ev[i]));g.lineTo(w,h);g.closePath();g.fill();
  g.strokeStyle='rgba(128,128,128,.7)';g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.stroke();
- for(let j=0;j<n-1;j++)if(d.cls[j]>=3){g.fillStyle=CLS[d.cls[j]][1];g.beginPath();g.arc(X(j+1),Y(d.ev[j+1]),3.2,0,7);g.fill()}
- g.strokeStyle='#2e7dd7';g.lineWidth=2;g.beginPath();g.moveTo(X(RV.i),0);g.lineTo(X(RV.i),h);g.stroke();
+ for(let j=0;j<n-1;j++)if(d.cls[j]>=3){g.fillStyle=CLS[d.cls[j]][1];g.beginPath();g.arc(X(j+1),Y(d.ev[j+1]),d.cls[j]===5?3.6:3,0,7);g.fill()}
+ if(RV.stage==='walk'||RV.i>0){g.strokeStyle=(TH&&TH.pal.ac)||'#2e7dd7';g.lineWidth=2;g.beginPath();g.moveTo(X(RV.i),0);g.lineTo(X(RV.i),h);g.stroke()}
 }
 function rvSan(P,bm){
  const L=legal(P),m=L.find(x=>x.fx===bm.fx&&x.fy===bm.fy&&x.tx===bm.tx&&x.ty===bm.ty);
  return m?san(P,bm.pr?{...m,pr:bm.pr}:m,L):'?';
 }
-function rvGo(i){
- const n=RV.POS.length,d=RV.data;if(!d)return;
- i=Math.max(0,Math.min(n-1,i));RV.i=i;
- const j=i-1,mv=j>=0?RV.MV[j]:null,st=$r('st');
- s=RV.POS[i];last=mv?[mv.fx,mv.fy,mv.tx,mv.ty]:null;moves=[];sel=null;pend=null;mate=false;
- st.className='';st.textContent=i===0?'Start position':(j>>1)+1+(j%2?'… ':'. ')+sans[j];
- let h='',arrow=null;
+/* a UCI line from position P as numbered SAN, e.g. "12. Nf3 Nc6 13. Bb5" */
+function rvLine(P,ply,uci){
+ let st=P,out=[],pl=ply;
+ for(const u of uci||[]){
+  const L=legal(st),m=L.find(x=>x.fx==='abcdefgh'.indexOf(u[0])&&x.fy===8-u[1]&&x.tx==='abcdefgh'.indexOf(u[2])&&x.ty===8-u[3]);
+  if(!m)break;const mm=u[4]?{...m,pr:u[4]}:m;
+  out.push((pl%2===0?((pl>>1)+1)+'. ':out.length?'':((pl>>1)+1)+'… ')+san(st,mm,L));st=apply(st,mm);pl++;
+ }
+ return out.join(' ');
+}
+/* called by viewTo while a review is open: commentary, arrow, graph and status for the position on the board */
+function rvView(){
+ const d=RV.data;if(!RV.on||!d)return;
+ const n=RV.POS.length,i=Math.min(curView(),n-1),j=i-1,st=$r('st');RV.i=i;
+ st.className='';
+ if(RV.stage==='sum'&&i>0)rvStage('walk');
+ if(RV.stage==='sum'){st.textContent='Game review';RV.arrow=RV.arrow2=null;rvGraph();return}
+ let h='',arrow=null,arrow2=null;
  if(j>=0){
-  const c=d.cls[j],bm=d.best[j],eg=rvEngine(),P=RV.POS[j],lossT=d.loss[j]>=1?' (−'+d.loss[j].toFixed(0)+'% win chance)':'';
-  h='<b style="color:'+CLS[c][1]+'">'+CLS[c][0]+'</b>'+lossT+' · eval '+rvEv(i);
+  const c=d.cls[j],bm=d.best[j],eg=rvEngine(),P=RV.POS[j],pl=j+startPly,ex=d.ex[j],mv=RV.MV[j];
+  st.textContent=((pl>>1)+1)+(pl%2?'\u2026 ':'. ')+sans[j];
+  const lossT=d.loss[j]>=1?' <span class="dim">(\u2212'+d.loss[j].toFixed(0)+'% win chance)</span>':'';
+  h='<div class="rh"><span class="bdg" style="background:'+CLS[c][1]+'">'+CLS[c][3]+'</span><div><b>'+sans[j]+'</b> \u00B7 <b style="color:'+CLS[c][1]+'">'+CLS[c][0]+'</b>'+lossT+'<br><span class="dim">'+(P.t==='w'?'White':'Black')+' \u00B7 evaluation '+rvEv(i)+'</span></div></div>';
   if(eg==='mj'){
-   const e=d.ex[j];
-   h+='<br>'+Math.round(e.pp*100)+'% of Maia '+RV.ml+' players would play '+sans[j];
-   if(bm&&e.rank!==0){h+='<br>Most likely: <b>'+rvSan(P,bm)+'</b> ('+Math.round(e.bp*100)+'%)';arrow=[bm.fx,bm.fy,bm.tx,bm.ty]}
-  }else if(c>0&&bm){h+='<br>Best was <b>'+rvSan(P,bm)+'</b>';arrow=[bm.fx,bm.fy,bm.tx,bm.ty]}
- }else h='Start position · eval '+rvEv(0);
- if(i===n-1&&d.ex[i].term)h+='<br>'+d.ex[i].term;
- $r('rvC').innerHTML=h;RV.arrow=arrow;
- rvGraph();draw();
+   h+='<div class="rl">'+Math.round(ex.pp*100)+'% of Maia '+RV.ml+' players would play '+sans[j]+'.</div>';
+   if(bm&&ex.rank!==0){h+='<div class="rl">The most likely move was <b>'+rvSan(P,bm)+'</b> ('+Math.round(ex.bp*100)+'%).</div>';arrow=[bm.fx,bm.fy,bm.tx,bm.ty]}
+  }else{
+   const alt=bm&&!sameMv(bm,mv)?rvSan(P,bm):'';
+   h+='<div class="rl">'+[
+    'This was the best move.',
+    alt?'Excellent, almost as good as <b>'+alt+'</b>.':'Excellent.',
+    alt?'A fine move. The engine preferred <b>'+alt+'</b>.':'A fine move.',
+    'An inaccuracy. <b>'+alt+'</b> was better.',
+    'A mistake. <b>'+alt+'</b> was better.',
+    'A blunder. <b>'+alt+'</b> was best.'][c]+'</div>';
+   if(alt){arrow=[bm.fx,bm.fy,bm.tx,bm.ty];if(c>=3)arrow2=[mv.fx,mv.fy,mv.tx,mv.ty]}
+   const ln=c>0&&ex.pv&&ex.pv.length>1?rvLine(P,pl,ex.pv):'';
+   if(ln)h+='<div class="rl dim">Best line: '+ln+'</div>';
+   else if(c===0){const e2=d.ex[i],l2=e2&&e2.pv&&e2.pv.length?rvLine(RV.POS[i],i+startPly,e2.pv):'';if(l2)h+='<div class="rl dim">Then: '+l2+'</div>'}
+   if(c>=3&&(ex.mate>0&&P.t==='w'||ex.mate<0&&P.t==='b'))h+='<div class="rl"><b>This missed a forced mate.</b></div>';
+  }
+ }else{
+  st.textContent='Start position';
+  h='<div class="rh"><div><b>Start position</b><br><span class="dim">Evaluation '+rvEv(0)+'. Press Next to see each move.</span></div></div>';
+ }
+ if(i===n-1){h+='<div class="rl">'+(d.ex[i].term?'<b>'+d.ex[i].term+'</b> \u00B7 ':'')+'End of the game. <button class="lnk" id="rvEnd">Back to the summary</button></div>'}
+ $r('rvC').innerHTML=h;RV.arrow=arrow;RV.arrow2=arrow2;
+ const be=$r('rvEnd');if(be)be.onclick=()=>{rvStage('sum');viewTo(0)};
+ $r('rvPrev').disabled=i<=0;$r('rvNext').disabled=i>=n-1;
+ rvGraph();
 }
+/* eval bar in the board's left margin, best-move arrow and the grade badge on the moved piece */
 function drawRev(){
- if(!RV.on||!RV.arrow)return;
- const a=RV.arrow,f=dc(a[0],a[1]),t=dc(a[2],a[3]),x1=P+(f[0]+.5)*C,y1=P+(f[1]+.5)*C,x2=P+(t[0]+.5)*C,y2=P+(t[1]+.5)*C;
- const g=Math.atan2(y2-y1,x2-x1),hl=C*.36,ex=x2-Math.cos(g)*hl*.8,ey=y2-Math.sin(g)*hl*.8;
- ctx.save();ctx.globalAlpha=.85;ctx.strokeStyle=ctx.fillStyle='#2e9e5b';ctx.lineWidth=C*.13;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(ex,ey);ctx.stroke();
- ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-Math.cos(g-.5)*hl,y2-Math.sin(g-.5)*hl);ctx.lineTo(x2-Math.cos(g+.5)*hl,y2-Math.sin(g+.5)*hl);ctx.closePath();ctx.fill();ctx.restore();
+ if(!RV.on)return;
+ const d=RV.data;
+ if(d){
+  const wp=Math.max(0,Math.min(100,d.ev[RV.i]))/100,x=4,w=10,y=P,h=8*C,wh=h*wp;
+  ctx.save();
+  ctx.fillStyle='#2b2b2b';ctx.fillRect(x,y,w,h);
+  ctx.fillStyle='#f4f2ea';if(FLP)ctx.fillRect(x,y,w,wh);else ctx.fillRect(x,y+h-wh,w,wh);
+  ctx.strokeStyle='rgba(128,128,128,.8)';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+  ctx.beginPath();ctx.moveTo(x,y+h/2);ctx.lineTo(x+w,y+h/2);ctx.stroke();
+  ctx.restore();
+ }
+ if(RV.arrow2)arrowAt(RV.arrow2,'#d9392b');
+ if(RV.arrow)arrowAt(RV.arrow,'#2e9e5b');
+ if(d&&RV.i>0){
+  const j=RV.i-1,c=d.cls[j],mv=RV.MV[j];
+  if(mv&&(c===0||c>=3)){
+   const t=dc(mv.tx,mv.ty),cx=P+(t[0]+1)*C-C*.2,cy=P+t[1]*C+C*.2;
+   ctx.save();ctx.fillStyle=CLS[c][1];ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=2;
+   ctx.beginPath();ctx.arc(cx,cy,C*.19,0,7);ctx.fill();ctx.stroke();
+   ctx.fillStyle='#fff';ctx.font='700 '+Math.round(C*.2)+'px '+(TH.fu||'sans-serif');ctx.textAlign='center';ctx.textBaseline='middle';
+   ctx.fillText(CLS[c][3],cx,cy+1);ctx.restore();
+  }
+ }
 }
-function rvNextMistake(){
- const d=RV.data;if(!d)return;const m=d.cls.length;
- for(let k=0;k<m;k++){const j=(RV.i+k)%m;if(d.cls[j]>=3&&j+1!==RV.i){rvGo(j+1);return}}
- $r('rvC').innerHTML='No mistakes or blunders found.';
+/* jump to the next / previous mistake or blunder (either side) */
+function rvJump(dir){
+ const d=RV.data;if(!d)return;const m=d.cls.length,j0=RV.i-1;
+ for(let k=1;k<=m;k++){const j=(((j0+dir*k)%m)+m)%m;if(d.cls[j]>=4){viewTo(j+1);return}}
+ $r('rvC').innerHTML='<div class="rl">No mistakes or blunders found.</div>';
 }
 $r('rvb').onclick=openReview;$r('rvg').onclick=openReview;$r('rvX').onclick=closeReview;
-$r('rvFirst').onclick=()=>rvGo(0);$r('rvPrev').onclick=()=>rvGo(RV.i-1);$r('rvNext').onclick=()=>rvGo(RV.i+1);$r('rvLast').onclick=()=>rvGo(RV.POS.length-1);
-$r('rvM').onclick=rvNextMistake;
-$r('rvG').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();rvGo(Math.round((e.clientX-r.left)/r.width*(RV.POS.length-1)))};
+$r('rvM').onclick=()=>rvJump(1);$r('rvPM').onclick=()=>rvJump(-1);
+$r('rvGo').onclick=()=>{rvStage('walk');viewTo(1)};
+$r('rvBack').onclick=()=>{rvStage('sum');viewTo(0)};
+$r('rvPrev').onclick=()=>viewTo(curView()-1);$r('rvNext').onclick=()=>viewTo(curView()+1);
+for(const id of['rvG','rvG2'])$r(id).onclick=e=>{const b=e.currentTarget.getBoundingClientRect();rvStage('walk');viewTo(Math.round((e.clientX-b.left)/b.width*(RV.POS.length-1)))};
 rvSync();
