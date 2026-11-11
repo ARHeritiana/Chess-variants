@@ -2,7 +2,13 @@
 release.keystore
 *.keystore
 *.jks
+*.p12
+*.pfx
+keystore-password.txt
 # build output
 build/
 *.apk.idsig
 engine-rs/target/
+
+# Generated Android package
+ChessVariants.apk

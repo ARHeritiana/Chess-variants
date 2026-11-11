@@ -37,7 +37,7 @@ function openReview(){
 function closeReview(){
  if(!RV.on)return;
  RV.tok++;if(typeof SF!=='undefined')SF.stop();if(Eng.cancel)Eng.cancel();
- RV.on=false;RV.arrow=null;document.body.classList.remove('rvm');$r('rv').hidden=true;
+ RV.on=false;RV.arrow=RV.arrow2=null;document.body.classList.remove('rvm');$r('rv').hidden=true;
  const st=$r('st');st.textContent=RV.saved.txt;st.className=RV.saved.cls;
  tk=Date.now();rvSync();viewTo(sans.length);
 }
@@ -123,24 +123,35 @@ function rvEv(i){
 function rvStage(st){
  RV.stage=st;
  $r('rvSumBox').hidden=st!=='sum';$r('rvWalk').hidden=st!=='walk';
+ requestAnimationFrame(rvGraph);
 }
 function rvShow(){
  const d=RV.data;$r('rvP').hidden=true;$r('rvR').hidden=false;
  const f=v=>v==null?'\u2013':Math.round(v),row=(l,a,b,c)=>'<span style="color:'+c+'"><i class="dot" style="background:'+c+'"></i>'+l+'</span><b>'+a+'</b><b>'+b+'</b>';
  const card=(who,a)=>'<div class="ac"><span>'+who+'</span><b>'+f(a)+'</b><small>accuracy</small></div>';
  $r('rvAcc').innerHTML=card('White',d.acc[0])+card('Black',d.acc[1]);
+ $r('rvOverview').innerHTML=['w','b'].map(side=>{
+  const js=d.loss.map((loss,j)=>({loss,j})).filter(x=>RV.POS[x.j].t===side).sort((a,b)=>b.loss-a.loss);
+  if(!js.length)return '';
+  const {j,loss}=js[0],who=side==='w'?'White':'Black',bm=d.best[j];
+  return '<div class="rl"><b>'+who+'</b>: '+(loss<5?'no major loss of winning chances.':'largest loss at <button class="lnk" data-p="'+(j+1)+'">'+rvMoveLabel(j)+'</button> (−'+Math.round(loss)+' percentage points).'+(bm&&!sameMv(bm,RV.MV[j])?' Review '+rvSan(RV.POS[j],bm)+' as an alternative.':''))+'</div>';
+ }).join('');
+ $r('rvOverview').onclick=e=>{const b=e.target.closest('[data-p]');if(b){rvStage('walk');viewTo(+b.dataset.p)}};
  $r('rvS').innerHTML='<span></span><b>White</b><b>Black</b>'+CLS.map((c,k)=>row(c[2],d.cnt[0][k],d.cnt[1][k],c[1])).join('');
- const km=[];d.cls.forEach((c,j)=>{if(c>=4)km.push(j)});
- $r('rvK').innerHTML=km.length?'<div class="lb">Key moments</div>'+km.slice(0,16).map(j=>{const pl=j+startPly;
-   return '<button class="km" data-p="'+(j+1)+'" style="border-color:'+CLS[d.cls[j]][1]+'"><b style="color:'+CLS[d.cls[j]][1]+'">'+CLS[d.cls[j]][3]+'</b> '+((pl>>1)+1)+(pl%2?'\u2026':'.')+' '+sans[j]+'</button>'}).join('')+(km.length>16?'<span class="dim"> +'+(km.length-16)+' more</span>':''):'<div class="rl dim">No mistakes or blunders. Clean game.</div>';
+ const km=rvMoments();
+ $r('rvM').disabled=$r('rvPM').disabled=!km.length;
+ $r('rvK').innerHTML=km.length?'<div class="lb">Key moments</div>'+km.map(j=>{const pl=j+startPly;
+   return '<button class="km" data-p="'+(j+1)+'" style="border-color:'+CLS[d.cls[j]][1]+'"><b style="color:'+CLS[d.cls[j]][1]+'">'+CLS[d.cls[j]][3]+'</b> '+((pl>>1)+1)+(pl%2?'\u2026':'.')+' '+sans[j]+'</button>'}).join(''):'<div class="rl dim">No critical moments found.</div>';
  $r('rvK').onclick=e=>{const b=e.target.closest('.km');if(b){rvStage('walk');viewTo(+b.dataset.p)}};
+ $r('rvNotes').innerHTML=d.cls.map((c,j)=>'<button class="rvnote" data-p="'+(j+1)+'"><b>'+rvMoveLabel(j)+' · '+CLS[c][0]+'</b><small>'+rvComment(j)+'</small></button>').join('');
+ $r('rvNotes').onclick=e=>{const b=e.target.closest('[data-p]');if(b){rvStage('walk');viewTo(+b.dataset.p)}};
  rvStage('sum');viewTo(0);
 }
 function rvGraph(){for(const id of['rvG','rvG2'])rvGraph1($r(id))}
 function rvGraph1(cv){
- const w=cv.clientWidth||300,h=64,dpr=window.devicePixelRatio||1,d=RV.data,n=RV.POS.length;if(!d||!w)return;
- cv.width=w*dpr;cv.height=h*dpr;const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
- const X=i=>n>1?i/(n-1)*w:0,Y=v=>h-v/100*h;
+ const box=cv.getBoundingClientRect(),w=box.width,h=box.height,dpr=Math.min(3,window.devicePixelRatio||1),d=RV.data,n=RV.POS.length;if(!RV.on||!d||!w||!h)return;
+ cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+ const X=i=>4+(n>1?i/(n-1)*(w-8):0),Y=v=>h-4-Math.max(0,Math.min(100,v))/100*(h-8);
  g.fillStyle='#3a3a38';g.fillRect(0,0,w,h);
  g.fillStyle='#f1efe8';g.beginPath();g.moveTo(0,h);for(let i=0;i<n;i++)g.lineTo(X(i),Y(d.ev[i]));g.lineTo(w,h);g.closePath();g.fill();
  g.strokeStyle='rgba(128,128,128,.7)';g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.stroke();
@@ -196,6 +207,7 @@ function rvView(){
   st.textContent='Start position';
   h='<div class="rh"><div><b>Start position</b><br><span class="dim">Evaluation '+rvEv(0)+'. Press Next to see each move.</span></div></div>';
  }
+ if(j>=0)h+='<div class="rl">'+rvComment(j)+'</div>';
  if(i===n-1){h+='<div class="rl">'+(d.ex[i].term?'<b>'+d.ex[i].term+'</b> \u00B7 ':'')+'End of the game. <button class="lnk" id="rvEnd">Back to the summary</button></div>'}
  $r('rvC').innerHTML=h;RV.arrow=arrow;RV.arrow2=arrow2;
  const be=$r('rvEnd');if(be)be.onclick=()=>{rvStage('sum');viewTo(0)};
@@ -228,16 +240,47 @@ function drawRev(){
   }
  }
 }
-/* jump to the next / previous mistake or blunder (either side) */
+/* Critical moves include errors, changes in the favourite, mate and promotions. */
+function rvMoments(){
+ const d=RV.data;if(!d)return[];
+ return d.cls.map((c,j)=>c>=3||(d.ev[j]<=40&&d.ev[j+1]>=60)||(d.ev[j]>=60&&d.ev[j+1]<=40)||
+  /[=#]/.test(sans[j])||d.ex[j+1].term&&!d.ex[j].term||d.ex[j+1].mate!=null&&d.ex[j].mate==null?j:-1).filter(j=>j>=0);
+}
+function rvMoveLabel(j){const pl=j+startPly;return ((pl>>1)+1)+(pl%2?'… ':'. ')+sans[j]}
+function rvComment(j){
+ const d=RV.data,P=RV.POS[j],Q=RV.POS[j+1],m=RV.MV[j],who=P.t==='w'?'White':'Black';
+ const names={p:'pawn',n:'knight',b:'bishop',r:'rook',q:'queen',k:'king'},pc=P.b[m.fy*8+m.fx].toLowerCase(),piece=names[pc];
+ const target='abcdefgh'[m.tx]+(8-m.ty),captured=P.b[m.ty*8+m.tx],parts=[];
+ const checked=check(Q,Q.t==='w'),replies=legal(Q);
+ if(checked&&!replies.length)return 'Checkmate. '+who+' wins with '+sans[j]+'.';
+ if(!checked&&!replies.length)return 'Stalemate. The side to move has no legal move, so the game is drawn.';
+ if(m.k==='c')parts.push(who+' castles, moving the king and rook together.');
+ else if(m.pr)parts.push(who+' promotes to a '+names[m.pr.toLowerCase()]+(captured?', capturing the '+names[captured.toLowerCase()]:'')+'.');
+ else if(captured||m.k==='e')parts.push(who+' captures '+(m.k==='e'?'a pawn en passant':'the '+names[captured.toLowerCase()])+' on '+target+'.');
+ else if(check(P,P.t==='w'))parts.push(who+' answers the check with '+sans[j]+'.');
+ else if((pc==='n'||pc==='b')&&m.fy===(P.t==='w'?7:0))parts.push(who+' develops the '+piece+' to '+target+'.');
+ else parts.push(who+' moves the '+piece+' to '+target+'.');
+ if(checked)parts.push('This gives check.');
+ const loss=d.loss[j],bm=d.best[j],alt=bm&&!sameMv(bm,m)?rvSan(P,bm):'',before=d.ex[j].mate,after=d.ex[j+1].mate;
+ const hadMate=before!=null&&(P.t==='w'?before>0:before<0);
+ if(hadMate&&(after==null||(P.t==='w'?after<0:after>0)))parts.push('Misses a forced mate'+(alt?'; '+alt+' was the way to keep it.':'.'));
+ else if(loss>=5)parts.push('Gives up about '+Math.round(loss)+' percentage points of winning chances.'+(alt?' '+(rvEngine()==='mj'?'Maia preferred ':'Better: ')+alt+'.':''));
+ else if(d.ev[j]>=40&&d.ev[j]<=60&&d.ev[j+1]>=40&&d.ev[j+1]<=60&&!checked)parts.push('The position stays balanced.');
+ else if(alt&&d.cls[j]>0)parts.push((rvEngine()==='mj'?'Maia preferred ':'The engine preferred ')+alt+'.');
+ return parts.join(' ');
+}
 function rvJump(dir){
- const d=RV.data;if(!d)return;const m=d.cls.length,j0=RV.i-1;
- for(let k=1;k<=m;k++){const j=(((j0+dir*k)%m)+m)%m;if(d.cls[j]>=4){viewTo(j+1);return}}
- $r('rvC').innerHTML='<div class="rl">No mistakes or blunders found.</div>';
+ const km=rvMoments(),current=RV.i-1;if(!km.length)return;
+ const j=dir>0?km.find(j=>j>current):km.slice().reverse().find(j=>j<current);
+ rvStage('walk');viewTo((j==null?(dir>0?km[0]:km[km.length-1]):j)+1);
 }
 $r('rvb').onclick=openReview;$r('rvg').onclick=openReview;$r('rvX').onclick=closeReview;
 $r('rvM').onclick=()=>rvJump(1);$r('rvPM').onclick=()=>rvJump(-1);
 $r('rvGo').onclick=()=>{rvStage('walk');viewTo(1)};
 $r('rvBack').onclick=()=>{rvStage('sum');viewTo(0)};
 $r('rvPrev').onclick=()=>viewTo(curView()-1);$r('rvNext').onclick=()=>viewTo(curView()+1);
-for(const id of['rvG','rvG2'])$r(id).onclick=e=>{const b=e.currentTarget.getBoundingClientRect();rvStage('walk');viewTo(Math.round((e.clientX-b.left)/b.width*(RV.POS.length-1)))};
+for(const id of['rvG','rvG2'])$r(id).onclick=e=>{const b=e.currentTarget.getBoundingClientRect();rvStage('walk');if(RV.data&&b.width)viewTo(Math.round((e.clientX-b.left)/b.width*(RV.POS.length-1)))};
 rvSync();
+
+addEventListener('resize',rvGraph);
+if(window.ResizeObserver){const ro=new ResizeObserver(rvGraph);for(const id of ['rvG','rvG2'])ro.observe($r(id))}

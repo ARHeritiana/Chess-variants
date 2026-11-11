@@ -20,6 +20,80 @@ Native bits (`MainActivity.java`): keep-screen-on, vibration, fullscreen, status
 - Settings, the game in progress and saved games are stored in the WebView's localStorage (`cos_*` keys).
 - Tests: `node tools/app-tests/replay.js` (save/restore, FEN start, undo) and the engine suites below. To try the UI in a desktop browser, serve `app/src/main/assets/www` with any static server (for example `python3 -m http.server -d app/src/main/assets/www`).
 
+## Phone layout and review
+
+The app uses the available viewport width without a minimum-width board. Player strips, menus,
+review controls and result buttons can wrap on narrow phones. The board retains its square
+aspect ratio; review charts have their own fixed-height geometry and backing stores measured
+at the displayed size. Charts redraw when shown or resized, and vertical swipes can scroll
+past them.
+
+Review includes a short comment for every move, covering captures, development, checks,
+castling, promotion, changes in winning chances, and better moves from the selected engine.
+The summary highlights each side's largest loss. Key-moment buttons jump in both directions
+through inaccuracies, mistakes, blunders, changes in the favoured side, promotions and mating
+moments. The move-by-move comments in the summary are tappable.
+
+Two very small offline language models were evaluated on 24 explanation fixtures and rejected
+for repetition, misleading wording and limited usefulness relative to their size and latency.
+No model download is required. See [the evaluation and complete outputs](docs/coach-model-evaluation.md).
+
+## Voice moves
+
+Tap **Speak a move** on the live board. English examples: “knight to f3”, “e2 to e4”,
+“castle kingside”, and “a7 to a8 promote to knight”. The app matches against legal moves,
+shows ambiguous choices, and always asks for confirmation before playing. Results are rejected
+if the game or position changed while listening. Voice input uses Android's installed speech
+recognition activity; availability, internet needs and audio handling depend on that service.
+In desktop browsers it uses Web Speech Recognition where available. Board input always works
+without speech support.
+
+## Signing keys
+
+See [secure signing setup](signing/README.md) for the GitHub Actions secrets, the manual signed-APK workflow, the public signing certificate and backup instructions. Never commit a private key or password.
+
+## App updates and releases
+
+The Android app checks the latest **public, stable GitHub release** at startup, on resume or
+reconnection when due, and every 15 minutes while in the foreground. Settings also has a manual
+check. An in-app banner offers **Download update** and **Later**. Download opens the browser;
+Android's ordinary APK installer handles installation after the download. An installed older
+build without the checker needs one manual upgrade first. No background service runs when the
+app is closed.
+
+Build with the **same release keystore** used for the installed app and an increasing integer
+`VERSION_CODE`. The defaults are version 2.1, code 4. `build.sh` produces `ChessVariants.apk`
+and `build/ChessVariants-4.apk`. Upload the latter to a published stable GitHub release:
+
+```sh
+VERSION_CODE=4 VERSION_NAME=2.1 KS_FILE=/path/to/existing/release.keystore KS_PASS_FILE=/path/to/password ./build.sh
+# After checking the APK, publish a release with build/ChessVariants-4.apk attached.
+```
+
+The checker recognises `ChessVariants-<versionCode>.apk`; a release without such an asset is
+not an update. Drafts and prereleases are excluded. Never publish an APK signed with a new
+test key as an update for existing installations.
+
+To use another host, change `app/src/main/res/values/updates.xml` to a public HTTPS manifest
+URL returning `{ "package_name": "app.chessonsurfaces", "version_code": 4, "version_name": "2.1",
+"url": "https://example.com/ChessVariants-4.apk" }`. No GitHub credentials are stored in the APK.
+
+## UI and update regression tests
+
+Run the existing save/restore checks with `node tools/app-tests/replay.js`. For browser checks,
+install Playwright, serve the static app on localhost:8000, then run
+`node tools/app-tests/mobile.js` (`APP_URL` and `CHROMIUM_PATH` can override the defaults).
+This checks real Stockfish review, both chart geometries at DPR 3, eight viewport sizes in all
+four themes and all menu tabs, voice parsing and confirmation, review cleanup, concise move
+comments and update-banner controls.
+
+The update-feed parser also has a standalone JVM test. With the standard `org.json` JAR available:
+
+```sh
+javac -cp /path/to/json.jar -d /tmp/chess-update-tests app/src/main/java/app/chessonsurfaces/UpdateManifest.java tools/app-tests/UpdateManifestTest.java
+java -cp /tmp/chess-update-tests:/path/to/json.jar app.chessonsurfaces.UpdateManifestTest
+```
+
 ## Maia opponent (Classical surface only)
 - `www/js/maia.js` runs [Maia](https://maiachess.com) (lc0-format nets, 6 blocks x 64 filters, SE) in plain JS: no native code, no network. It plays by sampling the policy head over the legal moves (temperature 1, top-95% nucleus), so it makes human-like mistakes. No search.
 - Weights: `www/maia/maia-{1100,1500,1900}.bin` (BN-folded fp16, ~1.2 MB each) + `maia-map.json` (lc0 policy tables). Source nets: `maia_weights/*.pb.gz` in github.com/CSSLab/maia-chess.

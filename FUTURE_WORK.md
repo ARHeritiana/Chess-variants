@@ -1,6 +1,13 @@
 # Future work
 
-Pending improvements and reported defects. These are **not yet implemented or verified as fixed**.
+This file retains the original reports. Phone-width containment, review chart geometry,
+vertical chart scrolling, richer comments and key-moment navigation have now been implemented
+and checked in Chromium at eight viewport sizes across all four themes. Starting a new game
+also clears review state. Native Android device verification is still needed.
+
+Remaining work includes alternative review variations, arrow styling and the separate Cylinder
+engine-response investigation. The historical observations below should not be read as a claim
+that every item is still unfixed.
 
 ## Mobile game review and gameplay — reported 2026-11-01
 

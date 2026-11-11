@@ -4,6 +4,11 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
+import android.speech.RecognizerIntent;
+import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -29,6 +34,8 @@ public class MainActivity extends Activity {
     private static final String HOST = "appassets.androidplatform.net";
     private WebView wv;
     private SharedPreferences sp;
+    private AppUpdates updates;
+    private static final int VOICE_REQUEST = 41;
     private boolean menuOpen, fullscreen, keepAwake = true;
 
     @Override protected void onCreate(Bundle b) {
@@ -47,10 +54,13 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
+        s.setUseWideViewPort(true);
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
         wv.addJavascriptInterface(new Bridge(), "NativeApp");
+        updates = new AppUpdates(this, wv);
         wv.setWebViewClient(new WebViewClient() {
+            @Override public void onPageFinished(WebView view, String url) { updates.ready(); }
             @Override public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
                 return serve(r.getUrl().getHost(), r.getUrl().getPath());
             }
@@ -93,14 +103,14 @@ public class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(f);
     }
 
-    @Override protected void onResume() { super.onResume(); wv.onResume(); wv.evaluateJavascript("window.__resume&&__resume()", null); applyKeepAwake(); applyImmersive(); }
-    @Override protected void onPause() { wv.onPause(); super.onPause(); }
+    @Override protected void onResume() { super.onResume(); wv.onResume(); updates.resume(); wv.evaluateJavascript("window.__resume&&__resume()", null); applyKeepAwake(); applyImmersive(); }
+    @Override protected void onPause() { updates.pause(); wv.onPause(); super.onPause(); }
     @Override protected void onSaveInstanceState(Bundle o) { super.onSaveInstanceState(o); wv.saveState(o); }
     @Override public void onConfigurationChanged(Configuration c) {
         super.onConfigurationChanged(c);
         wv.evaluateJavascript("window.__sysMode&&__sysMode()", null);
     }
-    @Override protected void onDestroy() { wv.destroy(); super.onDestroy(); }
+    @Override protected void onDestroy() { updates.destroy(); wv.destroy(); super.onDestroy(); }
 
     @Override public void onBackPressed() {
         wv.evaluateJavascript("window.__back?__back():false", new ValueCallback<String>() {
@@ -108,7 +118,37 @@ public class MainActivity extends Activity {
         });
     }
 
+    private void voiceError(String message) {
+        wv.evaluateJavascript("window.__voiceError&&window.__voiceError(" + JSONObject.quote(message) + ")", null);
+    }
+    @Override protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+        if (request != VOICE_REQUEST) return;
+        ArrayList<String> words = data == null ? null : data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+        if (result != RESULT_OK || words == null || words.isEmpty()) {
+            voiceError("No speech recognised. Tap Speak a move to try again."); return;
+        }
+        wv.evaluateJavascript("window.__voiceResult&&window.__voiceResult(" + new JSONArray(words).toString() + ")", null);
+    }
+
     private class Bridge {
+        @JavascriptInterface public void checkUpdates() {
+            runOnUiThread(new Runnable() { public void run() { updates.check(true); }});
+        }
+        @JavascriptInterface public void openUpdate() {
+            runOnUiThread(new Runnable() { public void run() { updates.open(); }});
+        }
+        @JavascriptInterface public void speakMove() {
+            runOnUiThread(new Runnable() { public void run() {
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+                intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a chess move, such as knight to f3");
+                try { startActivityForResult(intent, VOICE_REQUEST); }
+                catch (Exception e) { voiceError("No speech recognition service is installed. Install or enable one to use voice input."); }
+            }});
+        }
         @JavascriptInterface public boolean systemDark() {
             return (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
         }
