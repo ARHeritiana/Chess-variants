@@ -17,6 +17,7 @@ Native bits (`MainActivity.java`): keep-screen-on, vibration, fullscreen, status
 - **Import**: Game > Import takes a PGN (comments, variations and NAGs are skipped; coordinate moves work too; a `[Variant]` tag selects the surface) or a FEN to play from a position. A game in progress survives the app being closed or killed (`cos_game`).
 - Build: `./build.sh` (needs aapt, apksigner, zipalign, dalvik-exchange, android-sdk-platform-23, a JDK). Outputs `ChessVariants.apk`.
 - The APK is signed with a self-generated key (`release.keystore`, created on first build, **not** in the repository). Run `KS_PASS=<password> ./build.sh`, and keep the keystore and password safe to install future updates over the same app.
+- Releases: the `Release APK` workflow (Actions tab > Run workflow) builds, signs and publishes a GitHub Release. It reads the keystore from the repository secrets `KEYSTORE_BASE64` (`base64 -w0 release.keystore`) and `KS_PASS`.
 - Settings, the game in progress and saved games are stored in the WebView's localStorage (`cos_*` keys).
 - Tests: `node tools/app-tests/replay.js` (save/restore, FEN start, undo) and the engine suites below. To try the UI in a desktop browser, serve `app/src/main/assets/www` with any static server (for example `python3 -m http.server -d app/src/main/assets/www`).
 
