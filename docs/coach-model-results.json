@@ -1,0 +1,423 @@
+[
+  {
+    "model": "135",
+    "id": "quiet-development",
+    "facts": "White played Nf3. The engine rates this move as best. White moves the knight to f3. The position is balanced.",
+    "must": [
+      "Nf3"
+    ],
+    "avoid": [
+      "best move in the game",
+      "attack",
+      "threat"
+    ],
+    "result": "White's move Nf3 is a good example of a balanced position in chess. The knight's move f3 is a good way to balance the position, as it allows White to control the center of the board and has a better chance of winning.",
+    "ms": 11183,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "queen-blunder",
+    "facts": "White played Qh5. The engine rates this move as blunder. White moves the queen to h5. White lost 30 percentage points of winning chances. The engine recommends Nf3 instead.",
+    "must": [
+      "Qh5",
+      "Nf3"
+    ],
+    "avoid": [
+      "checkmate",
+      "30% of",
+      "0.50"
+    ],
+    "result": "White's chess review facts:\n\n- White played Qh5.\n- The engine recommends Nf3 instead.\n- White lost 30 percentage points of winning chances.\n- The engine recommends Nf3 instead.\n- White lost 30 percentage points of winning chances.\n- The engine recommends Nf3 instead.\n- White lost 30 percentage points",
+    "ms": 15667,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "queen-capture",
+    "facts": "Black played Rxe4. The engine rates this move as good. Black captures the queen on e4. The position favours Black.",
+    "must": [
+      "queen",
+      "e4"
+    ],
+    "avoid": [
+      "checkmate",
+      "pawn"
+    ],
+    "result": "Black's capture of the queen on e4 is a strong move, and Black's engine rates it as good.",
+    "ms": 8442,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "castle",
+    "facts": "White played O-O. The engine rates this move as excellent. White castles, moving the king and rook together. The position is balanced.",
+    "must": [
+      "castl"
+    ],
+    "avoid": [
+      "queen",
+      "wins",
+      "checkmate"
+    ],
+    "result": "White's chess review facts are:\n\n- White played O-O.\n- The engine rates this move as excellent.\n- White castles, moving the king and rook together.\n- The position is balanced.\n- White's chess review facts are:\n\n- White played O-O.\n- The engine rates this move as excellent.\n- White castles, moving",
+    "ms": 14135,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "underpromotion",
+    "facts": "White played a8=N+. The engine rates this move as best. White promotes to a knight. This gives check. The position favours White.",
+    "must": [
+      "knight",
+      "check"
+    ],
+    "avoid": [
+      "queen",
+      "checkmate",
+      "stalemate"
+    ],
+    "result": "White played a8=N+ as best. The engine rates this move as best. White promotes to a knight. This gives check. The position favours White.",
+    "ms": 9438,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "checkmate",
+    "facts": "White played Qxf7#. The engine rates this move as best. White captures the pawn on f7. This is checkmate.",
+    "must": [
+      "checkmate"
+    ],
+    "avoid": [
+      "draw",
+      "can escape",
+      "Nf3"
+    ],
+    "result": "White's move Qxf7# is a classic checkmate. The engine rates this move as best, and the engine rates this move as best.",
+    "ms": 9066,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "missed-mate",
+    "facts": "Black played Kh7. The engine rates this move as blunder. Black moves the king to h7. Black lost 45 percentage points of winning chances. The engine recommends Qg2 instead. Qg2 forces checkmate in two moves.",
+    "must": [
+      "Qg2",
+      "mate"
+    ],
+    "avoid": [
+      "White blundered",
+      "Kh7 is best"
+    ],
+    "result": "Black's chess review facts are as follows:\n\n- Black played Kh7.\n- Black lost 45% of the winning chances.\n- Black's engine recommends Qg2 instead.\n- Qg2 forces checkmate in two moves.\n- Black lost 45% of the winning chances.\n\nThese facts are not in order, as they are not based",
+    "ms": 16144,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "equal-exchange",
+    "facts": "White played Bxd5. The engine rates this move as good. White captures a knight on d5. The position is balanced. The engine recommends Re1 instead.",
+    "must": [
+      "d5"
+    ],
+    "avoid": [
+      "winning a queen",
+      "checkmate",
+      "wins the game"
+    ],
+    "result": "White's move Re1 is a good one, as it's a good balance of the engine's recommendations.",
+    "ms": 8632,
+    "missing": [
+      "d5"
+    ],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "en-passant",
+    "facts": "Black played exd3. The engine rates this move as excellent. Black captures a pawn en passant on d3. The position is balanced.",
+    "must": [
+      "passant"
+    ],
+    "avoid": [
+      "queen",
+      "checkmate"
+    ],
+    "result": "Black's move is excellent.",
+    "ms": 8791,
+    "missing": [
+      "passant"
+    ],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "defend-check",
+    "facts": "White played Be2. The engine rates this move as best. White blocks the check with the bishop on e2. The position is balanced.",
+    "must": [
+      "check",
+      "bishop"
+    ],
+    "avoid": [
+      "checkmate",
+      "White gives check"
+    ],
+    "result": "White's move was a good one, but it's not a perfect move. The engine rates this move as best, and it's not a perfect move. The position is balanced, and the engine rates this move as best.",
+    "ms": 14110,
+    "missing": [
+      "check",
+      "bishop"
+    ],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "variant-boundary",
+    "facts": "Cylinder chess. White played Ra4. The engine rates this move as good. White moves the rook to a4. The position is balanced. No tactical conclusion is known.",
+    "must": [
+      "a4"
+    ],
+    "avoid": [
+      "cannot cross",
+      "edge stops",
+      "wins a piece",
+      "checkmate"
+    ],
+    "result": "Cylinder chess. White played Ra4. The engine rates this move as good. White moves the rook to a4. The position is balanced. No tactical conclusion is known.",
+    "ms": 10649,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "135",
+    "id": "small-inaccuracy",
+    "facts": "Black played h6. The engine rates this move as inaccuracy. Black moves the pawn to h6. Black lost 7 percentage points of winning chances. The engine recommends Nf6 instead.",
+    "must": [
+      "Nf6"
+    ],
+    "avoid": [
+      "blunder",
+      "checkmate",
+      "7 pawns"
+    ],
+    "result": "Black lost 7 percentage points of winning chances in the game of chess.",
+    "ms": 8145,
+    "missing": [
+      "Nf6"
+    ],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "quiet-development",
+    "facts": "White played Nf3. The engine rates this move as best. White moves the knight to f3. The position is balanced.",
+    "must": [
+      "Nf3"
+    ],
+    "avoid": [
+      "best move in the game",
+      "attack",
+      "threat"
+    ],
+    "result": "White played Nf3, and the engine rates this move as best. White moves the knight to f3, and the position is balanced.",
+    "ms": 23704,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "queen-blunder",
+    "facts": "White played Qh5. The engine rates this move as blunder. White moves the queen to h5. White lost 30 percentage points of winning chances. The engine recommends Nf3 instead.",
+    "must": [
+      "Qh5",
+      "Nf3"
+    ],
+    "avoid": [
+      "checkmate",
+      "30% of",
+      "0.50"
+    ],
+    "result": "White played Qh5, which was considered a blunder by the engine. White moved the queen to h5, and White lost 30 percentage points of winning chances. The engine recommended Nf3 instead.",
+    "ms": 31746,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "queen-capture",
+    "facts": "Black played Rxe4. The engine rates this move as good. Black captures the queen on e4. The position favours Black.",
+    "must": [
+      "queen",
+      "e4"
+    ],
+    "avoid": [
+      "checkmate",
+      "pawn"
+    ],
+    "result": "Black's move is good because it allows Black to capture the queen on e4, which is a good move for Black.",
+    "ms": 23355,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "castle",
+    "facts": "White played O-O. The engine rates this move as excellent. White castles, moving the king and rook together. The position is balanced.",
+    "must": [
+      "castl"
+    ],
+    "avoid": [
+      "queen",
+      "wins",
+      "checkmate"
+    ],
+    "result": "White played O-O, and the engine rates this move as excellent. White castles, moving the king and rook together. The position is balanced.",
+    "ms": 26065,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "underpromotion",
+    "facts": "White played a8=N+. The engine rates this move as best. White promotes to a knight. This gives check. The position favours White.",
+    "must": [
+      "knight",
+      "check"
+    ],
+    "avoid": [
+      "queen",
+      "checkmate",
+      "stalemate"
+    ],
+    "result": "White played a8=N+. The engine rates this move as best. White promotes to a knight. This gives check. The position favours White.",
+    "ms": 35319,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "checkmate",
+    "facts": "White played Qxf7#. The engine rates this move as best. White captures the pawn on f7. This is checkmate.",
+    "must": [
+      "checkmate"
+    ],
+    "avoid": [
+      "draw",
+      "can escape",
+      "Nf3"
+    ],
+    "result": "White played Qxf7#, and the engine rates this move as best. White captures the pawn on f7, and this is checkmate.",
+    "ms": 24631,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "missed-mate",
+    "facts": "Black played Kh7. The engine rates this move as blunder. Black moves the king to h7. Black lost 45 percentage points of winning chances. The engine recommends Qg2 instead. Qg2 forces checkmate in two moves.",
+    "must": [
+      "Qg2",
+      "mate"
+    ],
+    "avoid": [
+      "White blundered",
+      "Kh7 is best"
+    ],
+    "result": "Black played Kh7, and the engine rates this move as a blunder. Black moves the king to h7, and Black lost 45% of winning chances. The engine recommends Qg2 instead, which forces checkmate in two moves.",
+    "ms": 37551,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "equal-exchange",
+    "facts": "White played Bxd5. The engine rates this move as good. White captures a knight on d5. The position is balanced. The engine recommends Re1 instead.",
+    "must": [
+      "d5"
+    ],
+    "avoid": [
+      "winning a queen",
+      "checkmate",
+      "wins the game"
+    ],
+    "result": "White played Bxd5, and the engine rates this move as good. White captures a knight on d5, and the position is balanced. The engine recommends Re1 instead.",
+    "ms": 27842,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "en-passant",
+    "facts": "Black played exd3. The engine rates this move as excellent. Black captures a pawn en passant on d3. The position is balanced.",
+    "must": [
+      "passant"
+    ],
+    "avoid": [
+      "queen",
+      "checkmate"
+    ],
+    "result": "Black's move is excellent, as it captures a pawn en passant on d3. The position is balanced.",
+    "ms": 23354,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "defend-check",
+    "facts": "White played Be2. The engine rates this move as best. White blocks the check with the bishop on e2. The position is balanced.",
+    "must": [
+      "check",
+      "bishop"
+    ],
+    "avoid": [
+      "checkmate",
+      "White gives check"
+    ],
+    "result": "White played Be2, and the engine rates this move as best. White blocks the check with the bishop on e2. The position is balanced.",
+    "ms": 24131,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "variant-boundary",
+    "facts": "Cylinder chess. White played Ra4. The engine rates this move as good. White moves the rook to a4. The position is balanced. No tactical conclusion is known.",
+    "must": [
+      "a4"
+    ],
+    "avoid": [
+      "cannot cross",
+      "edge stops",
+      "wins a piece",
+      "checkmate"
+    ],
+    "result": "Cylinder chess. White played Ra4. The engine rates this move as good. White moves the rook to a4. The position is balanced. No tactical conclusion is known.",
+    "ms": 28329,
+    "missing": [],
+    "invented": []
+  },
+  {
+    "model": "360",
+    "id": "small-inaccuracy",
+    "facts": "Black played h6. The engine rates this move as inaccuracy. Black moves the pawn to h6. Black lost 7 percentage points of winning chances. The engine recommends Nf6 instead.",
+    "must": [
+      "Nf6"
+    ],
+    "avoid": [
+      "blunder",
+      "checkmate",
+      "7 pawns"
+    ],
+    "result": "Black played h6, and the engine rates this move as inaccuracy. Black moves the pawn to h6, and Black lost 7 percentage points of winning chances. The engine recommends Nf6 instead.",
+    "ms": 29316,
+    "missing": [],
+    "invented": []
+  }
+]

@@ -20,13 +20,13 @@
   /* motion */
   --ease:cubic-bezier(.2,.8,.2,1);--sheet-ease:var(--ease);--dur:260ms;--stg:30ms;--ent:rise;--shk:0px;
   --scrim:rgba(0,0,0,.42);--sblur:0px;
-  --w:clamp(300px,min(96vw,560px),560px);
+  --w:min(560px,calc(100vw - 20px));
   --bgimg:none;
   interpolate-size:allow-keywords;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media(max-height:760px){:root{--w:clamp(300px,min(96vw,560px,calc(100dvh - 300px)),560px)}}
+@media(max-height:760px){:root{--w:min(560px,calc(100vw - 20px),max(220px,calc(100dvh - 300px)))}}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px);overscroll-behavior:none;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bgimg),var(--bg);background-attachment:fixed;color:var(--fg);
@@ -70,7 +70,7 @@ img.cp{width:24px;height:24px;margin-right:-9px;flex:none}
 
 /* ───────── board ───────── */
 .bw{position:relative;width:var(--bd,var(--w))}
-canvas{display:block;width:100%;height:auto;aspect-ratio:1;background:var(--card);border-radius:var(--r);
+#cv{display:block;width:100%;height:auto;aspect-ratio:1;background:var(--card);border-radius:var(--r);
   box-shadow:var(--sh);touch-action:none}
 .bw.hit{animation:shake 340ms linear}
 #pk{position:absolute;inset:0;z-index:5;display:none;background:rgba(0,0,0,.18);border-radius:var(--r)}
@@ -309,13 +309,15 @@ body.rvm .vbadge{display:none}
 @media (min-width:640px) and (orientation:landscape) and (min-aspect-ratio:5/4){
   :root{--bd:min(calc(100dvh - 76px),calc(100vw - 420px),860px);--w:min(420px,calc(100vw - var(--bd) - 56px))}
   body{display:grid;grid-template-columns:var(--bd) minmax(0,var(--w));column-gap:24px;justify-content:center;
-    grid-template-rows:auto repeat(7,min-content) 1fr;align-content:start;align-items:start;padding:8px 20px}
+    grid-template-rows:auto repeat(10,min-content) 1fr;align-content:start;align-items:start;padding:8px 20px}
   .bar{grid-column:1/-1;grid-row:1;width:100%;margin-bottom:4px}
-  .bw{grid-column:1;grid-row:2/10;position:sticky;top:8px}
-  #ts2{grid-column:2;grid-row:2}#st{grid-column:2;grid-row:3;justify-self:start;margin:2px 0 6px}
-  #bs2{grid-column:2;grid-row:4}.res{grid-column:2;grid-row:5}
-  .tb{grid-column:2;grid-row:6;position:static}
-  .mv{grid-column:2;grid-row:7}.rv{grid-column:2;grid-row:8}
+  .bw{grid-column:1;grid-row:3/12;position:sticky;top:8px}
+  #ts2{grid-column:2;grid-row:3}#st{grid-column:2;grid-row:4;justify-self:start;margin:2px 0 6px}
+  #bs2{grid-column:2;grid-row:5}.res{grid-column:2;grid-row:6}
+  .tb{grid-column:2;grid-row:7;position:static}
+  .mv{grid-column:2;grid-row:10}.rv{grid-column:2;grid-row:11}
+  .update{grid-column:1/-1;grid-row:2;width:100%}
+  #voiceStart{grid-column:2;grid-row:8}.voice{grid-column:2;grid-row:9}
   .strip,.res,.tb,.mv,.rv{width:100%}
   html[data-tb=bar] .tb{width:100%;max-width:none;margin:8px 0;border-width:var(--bw);border-radius:calc(var(--r)*.9)}
 }
@@ -323,3 +325,24 @@ body.rvm .vbadge{display:none}
   body{font-size:calc(var(--fsz)*1.05)}
   .tb button{min-height:56px}
 }
+
+/* Keep flex/grid contents inside the available phone width. */
+body>*{min-width:0;max-width:100%}
+html{overflow-x:clip}
+.strip{flex-wrap:wrap}.strip .nm{overflow-wrap:anywhere}
+.strip .clk{flex-shrink:0}
+button,.info,.rvc,.hm{overflow-wrap:anywhere}
+.sg{flex-wrap:wrap}.sg button{min-width:90px;font-size:14px;flex:1 1 90px}
+.rvt{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr)}
+.opts.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rbt{flex-wrap:wrap}.rbt button{min-width:70px}
+#rvG,#rvG2{display:block;width:100%;height:80px;aspect-ratio:auto;min-width:0;
+ border-radius:10px;cursor:pointer;margin:8px 0;touch-action:pan-y}
+.voice,.update{width:var(--w);padding:10px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin:6px 0}
+.voice[hidden],.update[hidden]{display:none}
+.voice-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+#voiceStart{width:var(--w);min-height:42px}
+body.rvm #voiceStart,body.rvm .voice{display:none}
+#rvNotes{max-height:320px;overflow-y:auto;margin-top:8px}
+.rvnote{display:block;width:100%;text-align:left;margin:4px 0;font-size:14px;min-height:44px}
+.rvnote small{display:block;color:var(--muted)}

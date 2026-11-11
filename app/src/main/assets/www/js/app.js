@@ -231,6 +231,8 @@ function parseFEN(f){
  return{s:{b,t,c,ep,hm},ply:(fm-1)*2+(t==='b'?1:0)};
 }
 function newGame(f0){
+ if(typeof RV!=='undefined'&&RV.on)closeReview();
+ if(typeof voiceCancel==='function')voiceCancel();
  if(mode!=='flat'&&(mlv||slv)){mlv=slv=0}
  if(mlv)Maia.load(mlv).catch(()=>{});
  if(slv)SF.init().catch(()=>{});

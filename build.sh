@@ -10,7 +10,7 @@
 # is created on the first build and is NOT in the repository: keep it and its password to update an installed app.
 set -euo pipefail
 cd "$(dirname "$0")"
-VERSION_CODE=${VERSION_CODE:-3}; VERSION_NAME=${VERSION_NAME:-2.0}
+VERSION_CODE=${VERSION_CODE:-4}; VERSION_NAME=${VERSION_NAME:-2.1}
 OUT=build; rm -rf $OUT; mkdir -p $OUT/classes
 
 if [ -n "${ANDROID_HOME:-}" ] && ls "$ANDROID_HOME"/build-tools/*/aapt >/dev/null 2>&1; then
@@ -26,7 +26,9 @@ else
   dex() { dalvik-exchange --dex --min-sdk-version=21 --output=$OUT/classes.dex $OUT/classes; }
 fi
 
-javac --release 8 -nowarn -classpath "$JAR" -d $OUT/classes $(find app/src/main/java -name '*.java')
+"$AAPT" package -f -m -J "$OUT" -M app/src/main/AndroidManifest.xml -S app/src/main/res -I "$JAR"
+
+javac --release 8 -nowarn -classpath "$JAR" -d $OUT/classes $(find app/src/main/java "$OUT/app" -name '*.java')
 dex
 "$AAPT" package -f -M app/src/main/AndroidManifest.xml -S app/src/main/res -A app/src/main/assets \
   -I "$JAR" --min-sdk-version 21 --target-sdk-version 34 --version-code "$VERSION_CODE" --version-name "$VERSION_NAME" -F $OUT/unsigned.apk
@@ -40,4 +42,5 @@ KS=${KS_FILE:-release.keystore}
 [ -f "$KS" ] || keytool -genkeypair -keystore "$KS" -storepass:env KS_PASS -keypass:env KS_PASS \
   -alias cos -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Chess on Surfaces"
 "$APKSIGNER" sign --ks "$KS" --ks-pass env:KS_PASS --key-pass env:KS_PASS --out ChessVariants.apk $OUT/aligned.apk
+cp ChessVariants.apk "$OUT/ChessVariants-$VERSION_CODE.apk"
 "$APKSIGNER" verify ChessVariants.apk && echo "Built ChessVariants.apk ($VERSION_NAME, code $VERSION_CODE)"

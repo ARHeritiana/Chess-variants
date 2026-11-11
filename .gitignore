@@ -6,3 +6,6 @@ release.keystore
 build/
 *.apk.idsig
 engine-rs/target/
+
+# Generated Android package
+ChessVariants.apk
