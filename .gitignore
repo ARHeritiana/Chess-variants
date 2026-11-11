@@ -2,6 +2,9 @@
 release.keystore
 *.keystore
 *.jks
+*.p12
+*.pfx
+keystore-password.txt
 # build output
 build/
 *.apk.idsig

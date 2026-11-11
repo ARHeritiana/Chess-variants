@@ -48,6 +48,10 @@ recognition activity; availability, internet needs and audio handling depend on 
 In desktop browsers it uses Web Speech Recognition where available. Board input always works
 without speech support.
 
+## Signing keys
+
+See [secure signing setup](signing/README.md) for the GitHub Actions secrets, the manual signed-APK workflow, the public signing certificate and backup instructions. Never commit a private key or password.
+
 ## App updates and releases
 
 The Android app checks the latest **public, stable GitHub release** at startup, on resume or
